@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ldap-service
+  name: ldap-service
+  labels:
+    name: ldap-service
+    app: ldap-service
+spec:
+  selector:
+    matchLabels:
+      app: ldap-service
+  template:
+    metadata:
+      name: ldap-service
+      labels:
+        name: ldap-service
+        app: ldap-service
+    spec:
+      containers:
+        - name: ldap-service
+          imagePullPolicy: Always
+          image: iandm/ldap:latest
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: uploads
+              mountPath: /uploads
+
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ldap-service-database
+                  key: url
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ldap-service-database
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ldap-service-database
+                  key: password
+            - name: SENDGRID_KEY
+                valueFrom:
+                  secretKeyRef:
+                    key: sendgrid-key
+                    name: sendgrid-secret
+                    optional: false
+            - name: SENGRID_URL
+                valueFrom:
+                  secretKeyRef:
+                    key: sendgrid-url
+                    name: sendgrid-secret
+                    optional: false

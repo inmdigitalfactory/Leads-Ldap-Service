@@ -1,0 +1,247 @@
+version: 2.1
+executors:
+  jdk-executor:
+    docker:
+      - image: circleci/openjdk:13-jdk-buster
+    working_directory: ~/LdapService
+
+  docker-executor:
+    docker:
+      - image: docker:17.05.0-ce-git
+    environment:
+      MAVEN_OPTS: -Xmx3200m
+    working_directory: ~/LdapService
+
+jobs:
+  dependencies:
+    executor: jdk-executor
+    steps:
+      - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "pom.xml" }}
+            - v1-dependencies-
+      - run:
+          name: maven install
+          command: mvn clean install -DskipTests
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+      #- run:
+      #name: Run tests
+      #command: mvn clean test jacoco:report coveralls:report sonar:sonar -DrepoToken=${COVERALLS_REPOTOKEN} -Dsonar.projectKey=${SONAR_PROJECTKEY} -Dsonar.organization=${SONAR_ORG} -Dsonar.host.url=${SONAR_HOST} -Dsonar.login=${SONAR_LOGIN}
+
+      - persist_to_workspace:
+          root: .
+          paths: .
+
+  test:
+    executor: jdk-executor
+    steps:
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "pom.xml" }}
+            - v1-dependencies-
+
+      - run:
+          name: Run Tests
+          command: mvn test
+
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/junit/
+            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/junit/ \;
+          when: always
+
+      - store_test_results:
+          path: ~/junit
+
+      - store_artifacts:
+          path: ~/junit
+          destination: test-results
+
+      - store_artifacts:
+          path: target/site/jacoco
+          destination: coverage
+
+      - persist_to_workspace:
+          root: .
+          paths: .
+
+  build:
+    executor: jdk-executor
+    steps:
+      - attach_workspace:
+          at: .
+
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "pom.xml" }}
+            - v1-dependencies-
+
+      - run:
+          name: Build LdapService-backend service app
+          command: mvn package
+
+      - persist_to_workspace:
+          root: .
+          paths: .
+
+  build_docker_image:
+    executor: docker-executor
+    steps:
+      - setup_remote_docker
+
+      - attach_workspace:
+          at: .
+      - run:
+          name: Build app Docker image
+          command: |
+            docker build -t iandm/LdapService-backend:$CIRCLE_SHA1 .
+
+      - run:
+          name: Save app Docker image
+          command: |
+            docker save -o LdapService-backend-image.tar iandm/LdapService-backend:$CIRCLE_SHA1
+
+      - persist_to_workspace:
+          root: .
+          paths: .
+
+  push_latest:
+    executor: docker-executor
+    steps:
+      - setup_remote_docker
+
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: Load app Docker image
+          command: |
+            docker load --input LdapService-backend-image.tar
+
+      - run:
+          name: Tag docker image
+          command: |
+            docker tag iandm/LdapService-backend:$CIRCLE_SHA1 iandm/LdapService-backend:latest
+
+      - run:
+          name: Push app Docker image
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker push iandm/LdapService-backend:latest
+  push_tagged:
+    executor: docker-executor
+    steps:
+      - setup_remote_docker
+
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: Load app Docker image
+          command: |
+            docker load --input LdapService-backend-image.tar
+
+      - run:
+          name: Tag docker image
+          command: |
+            docker tag iandm/LdapService-backend:$CIRCLE_SHA1 iandm/LdapService-backend:$CIRCLE_TAG
+
+      - run:
+          name: Push app Docker image
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker push iandm/LdapService-backend:$CIRCLE_TAG
+
+  push_production:
+    executor: docker-executor
+    steps:
+      - setup_remote_docker
+
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: Load app Docker image
+          command: |
+            docker load --input LdapService-backend-image.tar
+
+      - run:
+          name: Tag docker image
+          command: |
+            docker tag iandm/LdapService-backend:$CIRCLE_SHA1 iandm/LdapService-backend:production
+
+      - run:
+          name: Push app Docker image
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker push iandm/LdapService-backend:production
+
+workflows:
+  version: 2
+  test_build_push_tag:
+    jobs:
+      - dependencies:
+          filters:
+            tags:
+              only: /^v.*/
+
+      - test:
+          filters:
+            tags:
+              only: /^v.*/
+          requires:
+            - dependencies
+
+      - build:
+          filters:
+            tags:
+              only: /^v.*/
+          requires:
+            - test
+
+      - build_docker_image:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only:
+                - develop
+                - master
+          requires:
+            - build
+
+      - push_latest:
+          context: icube-context
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - build_docker_image
+
+      - push_production:
+          context: icube-context
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - build_docker_image
+
+      - push_tagged:
+          context: icube-context
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+          requires:
+            - build_docker_image
