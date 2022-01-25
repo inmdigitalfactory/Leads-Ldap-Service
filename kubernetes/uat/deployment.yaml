@@ -20,7 +20,7 @@ spec:
       containers:
         - name: ldap-service
           imagePullPolicy: Always
-          image: iandm/ldap:latest
+          image: iandm/ldap-service-backend:latest
           ports:
             - containerPort: 8080
           volumeMounts:
