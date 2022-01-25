@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Config
+clusters:
+  - name: "icube-staging"
+    cluster:
+      server: "https://lb.devops.inm.corp:8443/k8s/clusters/c-fw94h"
+      certificate-authority-data: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM3akNDQ\
+      WRhZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFvTVJJd0VBWURWUVFLRXdsMGFHVXQKY\
+      21GdVkyZ3hFakFRQmdOVkJBTVRDV05oZEhSc1pTMWpZVEFlRncweU1EQTBNVFV4TXpVME1ETmFGd\
+      zB6TURBMApNVE14TXpVME1ETmFNQ2d4RWpBUUJnTlZCQW9UQ1hSb1pTMXlZVzVqYURFU01CQUdBM\
+      VVFQXhNSlkyRjBkR3hsCkxXTmhNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ\
+      0tDQVFFQXVNa1hOdFZnQXBqb0VnUHMKQ0JZazFEbFVLc3AxQVVGQlpWUXVmR2RBZElPYWZNNHcvb\
+      ENBTUQ4MlZaRFlWNjh1WVE5bUd4WXVSdGJuM3VYMgp2aXRSY3RROWNIbzRXQ2JudEN2YVM2b2JvO\
+      EJDQ09sd3F2ejdOS0pWaWxLYTFwaHF1K3Y2bFZ3bXJrYnNPb2I0Ck5LSTRYdUxCbXljUmcyb2p1Y\
+      1Z4dHlYbFBoVCtwTHFNcWRNNmcxNng5eHRtSXNmRGx1aHlkaXR1a3c1aUE0aEwKUmpubHhkU1JkM\
+      mZPdlppUTh2ZzJOeDFJV3U0MlYwSXZpTU1WQmRqQ2IzZGxYa3ZBR3plR2dELzBXaHhSWWdCZQpaa\
+      VU4b24yZmFFUWhiREttWVlUcjZ6TFRlalBoUm1DbXIxaHVrYXBxVnlHWFVyejRGUUV6Z1pOR3c1W\
+      GV1ZUF4ClRWeE9Jd0lEQVFBQm95TXdJVEFPQmdOVkhROEJBZjhFQkFNQ0FxUXdEd1lEVlIwVEFRS\
+      C9CQVV3QXdFQi96QU4KQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBRjVodmFwLytlVGVVWmZyUCsrQ\
+      TZra21KZm1nZ1dUSmVBa0s2Q20xUgo4K1dIc1dvLzdWelVKQ2pGNS9LRk9XL3pPMFRmMk5PYmlHc\
+      m9LTUhQY1RPKzV0WmxpeVNHWmpRSTN5RHNTU21HClhDdm1wTzBBejNHTXJLVWVCenBKQW5JUEk0Q\
+      m5pQ3VTWVlxMWVoS1Z0a3kwUkp3TmVLc3NvcVVnSHFseWJLVTgKSFVyaVBWRURibzJEQ2tGS2ZuU\
+      y9MQ1BkMFhKTFlialI1YUhJY1YyRGt5ekxML2duL0FNSmJmSTJYUFF6UmpvbApEMG5KZmgrVkxPe\
+      TdLWHVQeU5adVBlVDhZbHo1S0tBdEJBOWI2Z0RxMTZNK2UvVzB6dTZwUkYyU2k1RWRua1IvCnlON\
+      lk2VnRtakxEZjVyYnQzWUNZTy9VTTIrWS9zanFFbGNFWjMzMHh6eExnUmc9PQotLS0tLUVORCBDR\
+      VJUSUZJQ0FURS0tLS0t"
+
+users:
+  - name: "icube-staging"
+    user:
+      token: "kubeconfig-u-crt7vcxx3c:6dxgfjtqqgnpp854w2tp98b6qjzx9rqdx2kmm2vtggslzxqx69kn76"
+
+contexts:
+  - name: "icube-staging"
+    context:
+      user: "icube-staging"
+      cluster: "icube-staging"
+
+current-context: "icube-staging"

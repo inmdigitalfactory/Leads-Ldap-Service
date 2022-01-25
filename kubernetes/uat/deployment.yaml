@@ -43,15 +43,3 @@ spec:
                 secretKeyRef:
                   name: ldap-service-database
                   key: password
-            - name: SENDGRID_KEY
-                valueFrom:
-                  secretKeyRef:
-                    key: sendgrid-key
-                    name: sendgrid-secret
-                    optional: false
-            - name: SENGRID_URL
-                valueFrom:
-                  secretKeyRef:
-                    key: sendgrid-url
-                    name: sendgrid-secret
-                    optional: false
