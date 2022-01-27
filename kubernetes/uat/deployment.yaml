@@ -23,10 +23,6 @@ spec:
           image: iandm/ldap-service-backend:latest
           ports:
             - containerPort: 8080
-          volumeMounts:
-            - name: uploads
-              mountPath: /uploads
-
           env:
             - name: DATABASE_URL
               valueFrom:
