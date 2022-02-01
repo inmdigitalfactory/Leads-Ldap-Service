@@ -2,8 +2,13 @@ package com.imbank.authentication.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.imbank.authentication.config.auth.AllowedAppsAuthenticationFilter;
+import com.imbank.authentication.config.auth.jwt.JWTConfigurer;
+import com.imbank.authentication.dtos.LdapUserDTO;
+import com.imbank.authentication.dtos.LoginSuccessDTO;
 import com.imbank.authentication.entities.AllowedApp;
 import com.imbank.authentication.services.AllowedAppService;
+import com.imbank.authentication.services.LdapService;
+import com.imbank.authentication.utils.AuthUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +32,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private AllowedAppService allowedAppService;
 
+    @Autowired
+    private LdapService ldapService;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -49,12 +57,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/swagger-ui/**",
                         "/resources/**").permitAll()
                 .anyRequest().authenticated()
+                .and()
+                .apply(securityConfigurerAdapter())
         ;
 
     }
 
     public AllowedAppsAuthenticationFilter allowedAppsAuthenticationFilter() throws Exception {
-        AllowedAppsAuthenticationFilter filter = new AllowedAppsAuthenticationFilter(allowedAppService);
+        AllowedAppsAuthenticationFilter filter = new AllowedAppsAuthenticationFilter(allowedAppService, ldapService);
         filter.setFilterProcessesUrl("/auth/login");
         filter.setAuthenticationManager(authenticationManagerBean());
         filter.setAuthenticationFailureHandler(this::authenticationFailureHandler);
@@ -81,13 +91,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         log.info("Login Successful");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        LdapUserDTO ldapUserDTO = (LdapUserDTO) authentication.getCredentials();
         AllowedApp allowedApp = (AllowedApp) authentication.getPrincipal();
-
+        LoginSuccessDTO loginSuccessDTO = AuthUtils.getLoginSuccessDTO(ldapUserDTO, allowedApp);
 
         ObjectMapper objectMapper=new ObjectMapper();
-        String r = objectMapper.writeValueAsString(allowedApp);
+        String r = objectMapper.writeValueAsString(loginSuccessDTO);
 
         response.getWriter().println(r);
+    }
+
+
+    private JWTConfigurer securityConfigurerAdapter() {
+        return new JWTConfigurer();
     }
 
 }

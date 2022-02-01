@@ -2,8 +2,10 @@ package com.imbank.authentication.config.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.imbank.authentication.dtos.AuthDTO;
+import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.entities.AllowedApp;
 import com.imbank.authentication.services.AllowedAppService;
+import com.imbank.authentication.services.LdapService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,9 +26,11 @@ public class AllowedAppsAuthenticationFilter extends UsernamePasswordAuthenticat
 
     private final AllowedAppService allowedAppService;
     private final ObjectMapper objectMapper;
+    private final LdapService ldapService;
 
-    public AllowedAppsAuthenticationFilter(AllowedAppService allowedAppService) {
+    public AllowedAppsAuthenticationFilter(AllowedAppService allowedAppService, LdapService ldapService) {
         this.allowedAppService = allowedAppService;
+        this.ldapService = ldapService;
 
         this.objectMapper = new ObjectMapper();
     }
@@ -54,9 +58,15 @@ public class AllowedAppsAuthenticationFilter extends UsernamePasswordAuthenticat
     @Override
     protected AuthenticationManager getAuthenticationManager() {
         return authentication -> {
-            //TODO perform ldap authentication
+            //perform ldap authentication
             log.info("Performing ldap authentication");
-            return authentication;
+            AuthDTO authDTO = (AuthDTO) authentication.getCredentials();
+            AllowedApp allowedApp = (AllowedApp) authentication.getPrincipal();
+            LdapUserDTO details = ldapService.getADDetails(authDTO);
+            if(ObjectUtils.isEmpty(details)) {
+                throw new AuthenticationCredentialsNotFoundException("Unknown LDAP User. Invalid Credentials");
+            }
+            return new UsernamePasswordAuthenticationToken(allowedApp, details);
         };
     }
 
