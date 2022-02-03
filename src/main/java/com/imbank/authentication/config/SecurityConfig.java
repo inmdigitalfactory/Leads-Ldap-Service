@@ -3,6 +3,7 @@ package com.imbank.authentication.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.imbank.authentication.config.auth.AllowedAppsAuthenticationFilter;
 import com.imbank.authentication.config.auth.jwt.JWTConfigurer;
+import com.imbank.authentication.dtos.ApiResponse;
 import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.dtos.LoginSuccessDTO;
 import com.imbank.authentication.entities.AllowedApp;
@@ -11,10 +12,12 @@ import com.imbank.authentication.services.LdapService;
 import com.imbank.authentication.utils.AuthUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
@@ -35,6 +38,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private LdapService ldapService;
 
+    @Value("${security.endpoints.allow}")
+    private String[] safeEndpoints;
+
+    @Override
+    public void configure(WebSecurity web) {
+        web.ignoring()
+                .antMatchers(safeEndpoints);
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -46,16 +58,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling()
                 .and()
                 .authorizeRequests()
-                .antMatchers("/configuration/**",
-                        "/v3/api-docs/**",
-                        "/swagger-resources/**",
-                        "/swagger-ui.html",
-                        "/webjars/**",
-                        "/auth/login**",
-                        "/api-docs/**",
-                        "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/resources/**").permitAll()
+                .antMatchers(safeEndpoints).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .apply(securityConfigurerAdapter())
@@ -80,7 +83,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             AuthenticationException e) throws IOException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         log.info("Error authenticating: {}", e.getLocalizedMessage());
-        response.getWriter().println(e.getLocalizedMessage());
+
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        ApiResponse<Void> apiResponse = new ApiResponse<>("-1", e.getLocalizedMessage(), null);
+        ObjectMapper objectMapper=new ObjectMapper();
+        String r = objectMapper.writeValueAsString(apiResponse);
+
+        response.getWriter().println(r);
     }
 
     private void authenticationSuccessHandler(

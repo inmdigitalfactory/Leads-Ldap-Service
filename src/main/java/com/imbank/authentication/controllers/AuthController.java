@@ -7,10 +7,7 @@ import com.imbank.authentication.services.AuthService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("auth")
@@ -31,13 +28,13 @@ public class AuthController {
         return "";
     }
 
-    @RequestMapping("/token/refresh")
+    @RequestMapping(value = "/token/refresh", method = {RequestMethod.GET, RequestMethod.POST})
     private ResponseEntity<LoginSuccessDTO> refreshToken() {
         LoginSuccessDTO loginDto = authService.refreshToken();
         return ResponseEntity.ok().body(loginDto);
     }
 
-    @RequestMapping("/token/validate")
+    @RequestMapping(value = "/token/validate", method = {RequestMethod.GET, RequestMethod.POST})
     private ResponseEntity<TokenValidDto> validateToken() {
         return ResponseEntity.ok().body(new TokenValidDto(authService.isTokenValid()));
     }
