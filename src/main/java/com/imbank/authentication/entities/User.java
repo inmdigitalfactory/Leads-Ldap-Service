@@ -21,8 +21,7 @@ import java.util.Set;
 @ToString
 @RequiredArgsConstructor
 @Table(name = "users", indexes = {
-        @Index(name = "username", columnList = "username"),
-        @Index(name = "enabled", columnList = "enabled"),
+        @Index(name = "username", columnList = "username")
 })
 public class User extends EntityAuditor {
     @Id

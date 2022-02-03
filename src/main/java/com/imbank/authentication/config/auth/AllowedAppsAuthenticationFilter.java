@@ -39,6 +39,7 @@ public class AllowedAppsAuthenticationFilter extends UsernamePasswordAuthenticat
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
 
+        log.info("Authorizing app: {}", request.getHeaderNames());
         String authHeader = getAuthHeader(request);
         if (authHeader == null) {
             throw new AuthenticationCredentialsNotFoundException("Unknown Application. Please authenticate");
