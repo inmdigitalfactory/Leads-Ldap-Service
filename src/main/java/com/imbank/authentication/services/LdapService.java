@@ -44,10 +44,12 @@ public class LdapService {
             contextSource.afterPropertiesSet();
 
             LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
-            ldapTemplate.getContextSource().getContext("uid="+credentials.getUsername()+","+ldapBaseDn, credentials.getPassword());
-
             AndFilter filter = new AndFilter();
             filter.and(new EqualsFilter("sAMAccountName", credentials.getUsername()));
+            boolean validCredentials = ldapTemplate.authenticate(ldapBaseDn, filter.encode(), credentials.getPassword());
+            if(!validCredentials) {
+                throw new IllegalArgumentException("Invalid username or password");
+            }
             LdapUserDTO ldapUser = new LdapUserDTO();
             ContextMapper<Object> contextMapper = o -> {
                 log.info("User found with valid credentials: {}", o);
@@ -55,10 +57,8 @@ public class LdapService {
 
                 ldapUser.setFirstName(getValue(a, "givenName"));
                 ldapUser.setLastName(getValue(a, "sn"));
-                ldapUser.setUsername(getValue(a, "uid"));
-                ldapUser.setName(getValue(a, "cn"));
-                ldapUser.setPhone(getValue(a, "telephoneNumber"));
-                ldapUser.setEmail(getValue(a, "mail"));
+                ldapUser.setName(getValue(a, "name"));
+                ldapUser.setEmail(getValue(a, "userPrincipalName"));
 
                 return ldapUser;
             };
