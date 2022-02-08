@@ -19,6 +19,12 @@
 	</properties>
 	<dependencies>
 		<dependency>
+			<groupId>com.oracle.database.jdbc</groupId>
+			<artifactId>ojdbc8</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
@@ -125,28 +131,12 @@
 		</profile>
 		<profile>
 			<id>uat</id>
-			<dependencies>
-				<dependency>
-					<groupId>com.oracle.database.jdbc</groupId>
-					<artifactId>ojdbc8</artifactId>
-					<scope>runtime</scope>
-					<optional>true</optional>
-				</dependency>
-			</dependencies>
 			<properties>
 				<activatedProperties>uat</activatedProperties>
 			</properties>
 		</profile>
 		<profile>
 			<id>prod</id>
-			<dependencies>
-				<dependency>
-					<groupId>com.oracle.database.jdbc</groupId>
-					<artifactId>ojdbc8</artifactId>
-					<scope>runtime</scope>
-					<optional>true</optional>
-				</dependency>
-			</dependencies>
 			<properties>
 				<activatedProperties>prod</activatedProperties>
 			</properties>
