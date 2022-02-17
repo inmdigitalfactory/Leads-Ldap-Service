@@ -62,6 +62,9 @@ public class AllowedAppsAuthenticationFilter extends UsernamePasswordAuthenticat
             //perform ldap authentication
             log.info("Performing ldap authentication");
             AuthDTO authDTO = (AuthDTO) authentication.getCredentials();
+            if(ObjectUtils.isEmpty(authDTO.getUsername()) || ObjectUtils.isEmpty(authDTO.getPassword())) {
+                throw new AuthenticationCredentialsNotFoundException("Password not allowed to be empty");
+            }
             AllowedApp allowedApp = (AllowedApp) authentication.getPrincipal();
             LdapUserDTO details = ldapService.getADDetails(authDTO);
             if(ObjectUtils.isEmpty(details)) {
