@@ -34,6 +34,10 @@ public class User extends EntityAuditor {
     @ToString.Exclude
     private Set<Role> roles;
     private String username;
+    private String ou;
+    @OneToOne
+    @JoinColumn(name = "app_id")
+    private AllowedApp app;
 
     @Override
     public boolean equals(Object o) {
