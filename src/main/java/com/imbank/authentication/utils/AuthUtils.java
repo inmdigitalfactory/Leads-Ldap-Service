@@ -4,6 +4,8 @@ import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.dtos.LoginSuccessDTO;
 import com.imbank.authentication.entities.AllowedApp;
 
+import java.util.UUID;
+
 public class AuthUtils {
 
 
@@ -18,4 +20,7 @@ public class AuthUtils {
         return loginSuccessDTO;
     }
 
+    public static String generateAccessToken() {
+        return UUID.randomUUID().toString();
+    }
 }

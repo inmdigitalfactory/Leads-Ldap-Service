@@ -7,8 +7,8 @@ import com.imbank.authentication.dtos.ApiResponse;
 import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.dtos.LoginSuccessDTO;
 import com.imbank.authentication.entities.AllowedApp;
-import com.imbank.authentication.services.AllowedAppService;
-import com.imbank.authentication.services.LdapService;
+import com.imbank.authentication.services.impl.AllowedAppServiceImpl;
+import com.imbank.authentication.services.impl.LdapServiceImpl;
 import com.imbank.authentication.utils.AuthUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +33,10 @@ import java.io.IOException;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private AllowedAppService allowedAppService;
+    private AllowedAppServiceImpl allowedAppServiceImpl;
 
     @Autowired
-    private LdapService ldapService;
+    private LdapServiceImpl ldapServiceImpl;
 
     @Value("${security.endpoints.allow}")
     private String[] safeEndpoints;
@@ -67,7 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     public AllowedAppsAuthenticationFilter allowedAppsAuthenticationFilter() throws Exception {
-        AllowedAppsAuthenticationFilter filter = new AllowedAppsAuthenticationFilter(allowedAppService, ldapService);
+        AllowedAppsAuthenticationFilter filter = new AllowedAppsAuthenticationFilter(allowedAppServiceImpl, ldapServiceImpl);
         filter.setFilterProcessesUrl("/auth/login");
         filter.setAuthenticationManager(authenticationManagerBean());
         filter.setAuthenticationFailureHandler(this::authenticationFailureHandler);
