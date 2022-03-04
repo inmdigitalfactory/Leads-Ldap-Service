@@ -3,6 +3,7 @@ package com.imbank.authentication.services.impl;
 import com.imbank.authentication.dtos.AuthDTO;
 import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.services.LdapService;
+import com.imbank.authentication.utils.RequestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ldap.core.ContextMapper;
