@@ -54,16 +54,19 @@ public class LdapServiceImpl implements LdapService {
             AndFilter filter = new AndFilter();
             filter.and(new EqualsFilter("sAMAccountName", credentials.getUsername()));
             boolean validCredentials = ldapTemplate.authenticate(ldapBaseDn, filter.encode(), credentials.getPassword());
+            boolean validCredentialsTz = false;
+
 
             if (!validCredentials) {
-                boolean validCredentialsTz = ldapTemplate.authenticate(ldapBaseDnTzUsers, filter.encode(), credentials.getPassword());
-            } else{
+                validCredentialsTz= ldapTemplate.authenticate(ldapBaseDnTzUsers, filter.encode(), credentials.getPassword());
+            }
+            if(!validCredentials && !validCredentialsTz){
                 throw new IllegalArgumentException("Invalid username or password");
             }
 
             LdapUserDTO ldapUser = new LdapUserDTO();
             ContextMapper<Object> contextMapper = o -> {
-                LdapServiceImpl.log.info("User found with valid credentials: {}", o);
+                log.info("User found with valid credentials: {}", o);
                 Attributes a = ((DirContextAdapter) o).getAttributes();
 
                 ldapUser.setFirstName(getValue(a, "givenName"));
@@ -80,7 +83,7 @@ public class LdapServiceImpl implements LdapService {
             }
             return ldapUser;
         } catch (Exception e) {
-            LdapServiceImpl.log.error("Could not authenticate", e);
+            log.error("Could not authenticate", e);
         }
         return null;
     }
