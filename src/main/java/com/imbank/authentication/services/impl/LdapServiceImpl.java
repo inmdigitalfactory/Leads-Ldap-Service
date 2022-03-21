@@ -74,6 +74,48 @@ public class LdapServiceImpl implements LdapService {
         return null;
     }
 
+    @Override
+    public LdapUserDTO getADDetails(String adUsername) {
+        try {
+            LdapContextSource contextSource = new LdapContextSource();
+            contextSource.setUrls(ldapUrls);
+            contextSource.setUserDn(ldapSecurityPrincipal);
+            contextSource.setPassword(ldapPrincipalPassword);
+            contextSource.setDirObjectFactory(DefaultDirObjectFactory.class);
+            contextSource.afterPropertiesSet();
+
+            LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
+            ldapTemplate.afterPropertiesSet();
+            AndFilter filter = new AndFilter();
+            filter.and(new EqualsFilter("sAMAccountName", credentials.getUsername()));
+            boolean validCredentials = ldapTemplate.authenticate(ldapBaseDn, filter.encode(), credentials.getPassword());
+
+            if (!validCredentials) {
+                throw new IllegalArgumentException("Invalid username or password");
+            }
+            LdapUserDTO ldapUser = new LdapUserDTO();
+            ContextMapper<Object> contextMapper = o -> {
+                LdapServiceImpl.log.info("User found with valid credentials: {}", o);
+                Attributes a = ((DirContextAdapter) o).getAttributes();
+
+                ldapUser.setFirstName(getValue(a, "givenName"));
+                ldapUser.setLastName(getValue(a, "sn"));
+                ldapUser.setName(getValue(a, "name"));
+                ldapUser.setEmail(getValue(a, "userPrincipalName"));
+
+                return ldapUser;
+            };
+            ldapTemplate.search(ldapBaseDn, filter.encode(), contextMapper);
+            return ldapUser;
+        } catch (Exception e) {
+            LdapServiceImpl.log.error("Could not authenticate", e);
+        }
+        return null;
+    }
+
+
+
+
     private String getValue(Attributes a, String key) {
         try {
             return "" + a.get(key).get();
