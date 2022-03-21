@@ -1,10 +1,23 @@
 package com.imbank.authentication.utils;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 
+@Slf4j
 public class RequestUtils {
 
     private static final String[] IP_HEADER_CANDIDATES = {
@@ -36,5 +49,28 @@ public class RequestUtils {
         }
 
         return request.getRemoteAddr();
+    }
+
+    public static void setupTrustStore() {
+        final String KS_PASSWORD = "imbank";
+        try {
+            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+            ks.load(null, KS_PASSWORD.toCharArray());
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+
+            try (InputStream cert = new ClassPathResource("ldapserver.cer").getInputStream()) {
+                Certificate certificate = cf.generateCertificate(cert);
+                ks.setCertificateEntry("imbank", certificate);
+            }
+            File keystore = new File("ldapserver.jks").getAbsoluteFile();
+            try (FileOutputStream fos = new FileOutputStream(keystore)) {
+                ks.store(fos, KS_PASSWORD.toCharArray());
+            }
+            log.info("Setting truststore to {}", keystore.getAbsolutePath());
+            System.setProperty("javax.net.ssl.trustStore", keystore.getAbsolutePath());
+            System.setProperty("javax.net.ssl.trustStorePassword", KS_PASSWORD);
+        } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
 }

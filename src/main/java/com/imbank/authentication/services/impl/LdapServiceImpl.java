@@ -3,6 +3,7 @@ package com.imbank.authentication.services.impl;
 import com.imbank.authentication.dtos.AuthDTO;
 import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.services.LdapService;
+import com.imbank.authentication.utils.RequestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ldap.core.ContextMapper;
@@ -24,6 +25,10 @@ public class LdapServiceImpl implements LdapService {
 
     @Value("${spring.ldap.base}")
     private String ldapBaseDn;
+
+    @Value("${spring.ldap.baseTz}")
+    private String ldapBaseDnTzUsers;
+
 
     @Value("${spring.ldap.username}")
     private String ldapSecurityPrincipal;
@@ -50,13 +55,19 @@ public class LdapServiceImpl implements LdapService {
             AndFilter filter = new AndFilter();
             filter.and(new EqualsFilter("sAMAccountName", credentials.getUsername()));
             boolean validCredentials = ldapTemplate.authenticate(ldapBaseDn, filter.encode(), credentials.getPassword());
+            boolean validCredentialsTz = false;
+
 
             if (!validCredentials) {
+                validCredentialsTz= ldapTemplate.authenticate(ldapBaseDnTzUsers, filter.encode(), credentials.getPassword());
+            }
+            if(!validCredentials && !validCredentialsTz){
                 throw new IllegalArgumentException("Invalid username or password");
             }
+
             LdapUserDTO ldapUser = new LdapUserDTO();
             ContextMapper<Object> contextMapper = o -> {
-                LdapServiceImpl.log.info("User found with valid credentials: {}", o);
+                log.info("User found with valid credentials: {}", o);
                 Attributes a = ((DirContextAdapter) o).getAttributes();
 
                 ldapUser.setFirstName(getValue(a, "givenName"));
@@ -66,10 +77,14 @@ public class LdapServiceImpl implements LdapService {
 
                 return ldapUser;
             };
-            ldapTemplate.search(ldapBaseDn, filter.encode(), contextMapper);
+            if(validCredentials){
+                ldapTemplate.search(ldapBaseDn, filter.encode(), contextMapper);
+            } else {
+                ldapTemplate.search(ldapBaseDnTzUsers, filter.encode(), contextMapper);
+            }
             return ldapUser;
         } catch (Exception e) {
-            LdapServiceImpl.log.error("Could not authenticate", e);
+            log.error("Could not authenticate", e);
         }
         return null;
     }
