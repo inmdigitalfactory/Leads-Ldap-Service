@@ -1,9 +1,6 @@
 package com.imbank.authentication.entities;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
@@ -19,10 +16,12 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Table(name = "users", indexes = {
         @Index(name = "username", columnList = "username")
 })
+@AllArgsConstructor
+@Builder(toBuilder = true)
 public class User extends EntityAuditor {
     @Id
     @GeneratedValue
@@ -30,14 +29,12 @@ public class User extends EntityAuditor {
 
     private String name;
     private boolean enabled;
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
-    private Set<Role> roles;
+    private Set<SystemAccess> systemAccesses;
     private String username;
-    private String ou;
-    @OneToOne
-    @JoinColumn(name = "app_id")
-    private AllowedApp app;
+    private String baseDn;
+
 
     @Override
     public boolean equals(Object o) {

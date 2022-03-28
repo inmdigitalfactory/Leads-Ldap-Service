@@ -28,9 +28,13 @@ public class Role extends EntityAuditor {
 
     private String name;
     private String description;
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
     private Set<Permission> permissions;
+    @ManyToOne
+    @JoinColumn(name = "app_id")
+    private AllowedApp app;
+    private boolean requiresSpecificApp;
 
 
     @Override
