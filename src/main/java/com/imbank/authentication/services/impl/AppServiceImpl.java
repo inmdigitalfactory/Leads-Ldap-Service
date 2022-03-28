@@ -1,7 +1,9 @@
 package com.imbank.authentication.services.impl;
 
 import com.imbank.authentication.dtos.AllowedAppDto;
+import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.entities.AllowedApp;
+import com.imbank.authentication.enums.AppPermission;
 import com.imbank.authentication.exceptions.AuthenticationExceptionImpl;
 import com.imbank.authentication.repositories.AllowedAppRepository;
 import com.imbank.authentication.services.AppService;
@@ -20,6 +22,7 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public AllowedApp createApp(AllowedAppDto allowedAppDto) {
+        AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.createApp));
         if(allowedAppRepository.findFirstByName(allowedAppDto.getName()).isPresent()) {
             throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST,"App already exists");
         }
@@ -36,7 +39,10 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public String resetToken(long id) {
-        AllowedApp allowedApp = allowedAppRepository.findById(id).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "No such application"));
+        AllowedApp allowedApp = allowedAppRepository.findById(id)
+                .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "No such application"));
+        AuthUtils.ensurePermitted(allowedApp, List.of(AppPermission.resetAppToken));
+
         String accessToken = AuthUtils.generateAccessToken();
         allowedApp.setAccessToken(accessToken);
         allowedAppRepository.save(allowedApp);
@@ -45,7 +51,9 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public AllowedApp updateApp(long id, AllowedAppDto allowedAppDto) {
-        AllowedApp allowedApp = allowedAppRepository.findById(id).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "No such application"));
+        AllowedApp allowedApp = allowedAppRepository.findById(id)
+                .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "No such application"));
+        AuthUtils.ensurePermitted(allowedApp, List.of(AppPermission.updateApp));
         allowedApp.setEnabled(allowedAppDto.isEnabled());
         allowedApp.setTokenValiditySeconds(allowedAppDto.getTokenValiditySeconds());
         allowedApp.setRefreshTokenValiditySeconds(allowedAppDto.getRefreshTokenValiditySeconds());
@@ -54,16 +62,20 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public List<AllowedApp> getApps() {
+        AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.getAllApps));
         return allowedAppRepository.findAll();
     }
 
     @Override
     public AllowedApp getApp(long id) {
-        return allowedAppRepository.findById(id).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "No such application"));
+        AuthUtils.ensurePermitted(id, List.of(AppPermission.getApp));
+        return allowedAppRepository.findById(id)
+                .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "No such application"));
     }
 
     @Override
     public void deleteApp(long id) {
+        AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.createApp));
         allowedAppRepository.deleteById(id);
     }
 }

@@ -3,10 +3,7 @@ package com.imbank.authentication.entities;
 import lombok.*;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Objects;
 
 /**
@@ -27,6 +24,8 @@ public class Permission extends EntityAuditor {
 
     private String code;
     private boolean description;
+    @ManyToOne
+    @JoinColumn(name = "access_app_id")
 
 
     @Override

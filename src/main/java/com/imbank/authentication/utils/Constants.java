@@ -8,5 +8,10 @@ public class Constants {
     public static final String CLAIM_USER = "user";
     public static final String CLAIM_APP = "app";
     public static final String CLAIM_IP = "ip";
+    public static final String CLAIM_ROLES = "roles";
+    public static final String CLAIM_PERMISSIONS = "permissions";
     public static final String CLAIM_FUNCTION = "function";
+
+
+    public static final String APP_NAME = "Authentication Service";
 }
