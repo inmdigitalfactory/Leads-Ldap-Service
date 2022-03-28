@@ -1,6 +1,7 @@
 package com.imbank.authentication.services;
 
 import com.imbank.authentication.dtos.AllowedAppDto;
+import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.entities.AllowedApp;
 
 import java.util.List;

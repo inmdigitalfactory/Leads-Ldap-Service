@@ -4,9 +4,12 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Arrays;
 
 @Configuration
 public class SwaggerConfig {
@@ -31,6 +34,16 @@ public class SwaggerConfig {
                                 .bearerFormat("Access Token")
                                 .in(SecurityScheme.In.HEADER)
                                 .description("App access token that allows app to use this service"))
+                        .addSecuritySchemes("UserToken", new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP)
+                                .name("Authorization")
+                                .scheme("Bearer")
+                                .bearerFormat("JWT")
+                                .in(SecurityScheme.In.HEADER)
+                                .description("User JWT"))
+                )
+                .addSecurityItem(
+                        new SecurityRequirement().addList("UserToken", Arrays.asList("read", "write"))
                 )
                 ;
     }

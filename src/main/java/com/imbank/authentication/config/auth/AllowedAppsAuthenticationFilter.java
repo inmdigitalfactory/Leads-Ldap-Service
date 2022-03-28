@@ -66,7 +66,7 @@ public class AllowedAppsAuthenticationFilter extends UsernamePasswordAuthenticat
                 throw new AuthenticationCredentialsNotFoundException("Username/Password not allowed to be empty");
             }
             AllowedApp allowedApp = (AllowedApp) authentication.getPrincipal();
-            LdapUserDTO details = ldapService.getADDetails(authDTO);
+            LdapUserDTO details = ldapService.getADDetails(allowedApp, authDTO);
             if(ObjectUtils.isEmpty(details)) {
                 throw new AuthenticationCredentialsNotFoundException("Unknown LDAP User. Invalid Credentials");
             }
