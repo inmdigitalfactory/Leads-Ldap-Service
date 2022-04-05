@@ -35,6 +35,7 @@ public class UserController {
         return ResponseEntity.ok().body(userService.updateUserRoles(userId, appId, roleDtos));
     }
 
+    @CrossOrigin(origins = "*")
     @GetMapping("")
     @SecurityRequirement(name = "Application Access Token")
     public ResponseEntity<List<User>> getAll() {

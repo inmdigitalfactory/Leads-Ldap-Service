@@ -89,11 +89,11 @@ public class Seeder {
                 adminRole = roleRepository.save(adminRole);
             }
 
-            String username = "einstein";
+            String username = "melisa.juma";
             Optional<User> adminUserOptional = userRepository.findFirstByUsername(username);
             User adminUser;
             if(adminUserOptional.isEmpty()) {
-                adminUser = User.builder().username(username).baseDn("dc=example,dc=com").build();
+                adminUser = User.builder().username(username).baseDn("OU=ICUBE,DC=imbl,DC=corp").build();
             }
             else {
                 adminUser = adminUserOptional.get();
