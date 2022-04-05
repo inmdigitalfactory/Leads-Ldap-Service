@@ -13,5 +13,10 @@ public enum AppPermission {
     updateUser,//specific to app
     deleteUser,//specific
     getUser,//specific
-    getAllUsers,//specific
+    getAllUsers,
+
+    getRoles,//specific
+    addRole,
+    updateRole,
+    setRolePermissions, getPermissions, addPermission, deleteRole
 }

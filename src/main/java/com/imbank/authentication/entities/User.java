@@ -29,7 +29,12 @@ public class User extends EntityAuditor {
 
     private String name;
     private boolean enabled;
-    @OneToMany(fetch = FetchType.EAGER)
+    private String department;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phone;
+    private String description;    @OneToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
     private Set<SystemAccess> systemAccesses;
     private String username;
