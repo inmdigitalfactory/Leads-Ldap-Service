@@ -9,6 +9,7 @@ import com.imbank.authentication.entities.SystemAccess;
 import com.imbank.authentication.enums.AppPermission;
 import com.imbank.authentication.exceptions.AuthenticationExceptionImpl;
 import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.ObjectUtils;
@@ -17,6 +18,7 @@ import java.util.*;
 
 import static com.imbank.authentication.utils.Constants.CLAIM_PERMISSIONS;
 
+@Slf4j
 public class AuthUtils {
 
     private static final ObjectMapper objectMapper;
@@ -85,5 +87,16 @@ public class AuthUtils {
         if(!permitted) {
             throw new AuthenticationExceptionImpl(HttpStatus.FORBIDDEN, "You do not have the necessary permissions");
         }
+    }
+
+    public static Optional<String> getLoggedInUser() {
+        try {
+            Claims claims = (Claims) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            log.info("Currently logged in user is {} - {}", claims.getSubject(), claims);
+            return Optional.ofNullable(claims.getSubject());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 }
