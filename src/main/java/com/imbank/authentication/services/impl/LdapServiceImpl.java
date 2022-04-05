@@ -110,9 +110,13 @@ public class LdapServiceImpl implements LdapService {
                 ldapUser.setName(getValue(a, "name"));
                 ldapUser.setEmail(getValue(a, "mail"));
                 ldapUser.setDepartment(getValue(a, "department"));
+                ldapUser.setPhone(getValue(a, "phone"));
                 ldapUser.setUsername(getValue(a, "sAMAccountName"));
                 ldapUser.setDescription(getValue(a, "description"));
 
+                if(ObjectUtils.isEmpty(ldapUser.getUsername())) {
+                    ldapUser.setUsername(adUsername);
+                }
                 return ldapUser;
             };
             log.info("Searching for user {}. Filter: {}", adUsername, filter.encode());

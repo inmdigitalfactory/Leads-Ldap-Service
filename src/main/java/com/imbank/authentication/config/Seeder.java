@@ -99,7 +99,12 @@ public class Seeder {
                 adminUser = adminUserOptional.get();
             }
             if(ObjectUtils.isEmpty(adminUser.getSystemAccesses())) {
-                SystemAccess systemAccess = systemAccessRepository.save(SystemAccess.builder().roles(Set.of(adminRole)).build());
+                SystemAccess systemAccess = systemAccessRepository
+                        .save(SystemAccess.builder()
+                            .roles(Set.of(adminRole))
+                            .app(app)
+                            .build()
+                );
                 adminUser.setSystemAccesses(Set.of(systemAccess));
                 userRepository.save(adminUser);
             }

@@ -23,9 +23,9 @@ public class Permission extends EntityAuditor {
     private Long id;
 
     private String code;
-    private boolean description;
-    @ManyToOne
-    @JoinColumn(name = "access_app_id")
+    private String description;
+    @OneToOne
+    private AllowedApp app;
 
 
     @Override
