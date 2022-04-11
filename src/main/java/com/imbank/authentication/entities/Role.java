@@ -1,5 +1,6 @@
 package com.imbank.authentication.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -20,7 +21,7 @@ import java.util.Set;
 @Setter
 @ToString
 @RequiredArgsConstructor
-@Table(name = "roles")
+@Table(name = "sys_roles")
 public class Role extends EntityAuditor {
     @Id
     @GeneratedValue
@@ -33,6 +34,7 @@ public class Role extends EntityAuditor {
     private Set<Permission> permissions;
     @ManyToOne
     @JoinColumn(name = "app_id")
+    @JsonIgnore
     private AllowedApp app;
     private boolean requiresSpecificApp;
 

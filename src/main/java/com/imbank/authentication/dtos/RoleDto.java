@@ -8,6 +8,6 @@ import java.util.List;
 @Data
 public class RoleDto {
     @Min(1)
-    private List<Long> roles;
+    private Long role;
     private List<Long> apps;
 }

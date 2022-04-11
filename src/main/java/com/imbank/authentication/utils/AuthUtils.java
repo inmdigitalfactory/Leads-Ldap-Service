@@ -94,9 +94,14 @@ public class AuthUtils {
             Claims claims = (Claims) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             log.info("Currently logged in user is {} - {}", claims.getSubject(), claims);
             return Optional.ofNullable(claims.getSubject());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception ignored) {}
         return Optional.empty();
+    }
+
+    public static String getPermissions() {
+        Claims claims = (Claims) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        log.info("Claims: {}", claims);
+        List<String> permissions = (List<String>) claims.get(CLAIM_PERMISSIONS);
+        return String.join(",", permissions);
     }
 }

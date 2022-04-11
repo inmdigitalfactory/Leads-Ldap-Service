@@ -2,6 +2,7 @@ package com.imbank.authentication.controllers;
 
 import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.dtos.RoleDto;
+import com.imbank.authentication.dtos.SystemAccessDto;
 import com.imbank.authentication.dtos.UserDto;
 import com.imbank.authentication.entities.User;
 import com.imbank.authentication.services.UserService;
@@ -31,8 +32,13 @@ public class UserController {
     }
 
     @PutMapping("{userId}/system-accesses/{appId}/roles")
-    public ResponseEntity<User> updateRoles(@PathVariable Long userId, @PathVariable Long appId, @RequestBody @Valid List<RoleDto> roleDtos) {
-        return ResponseEntity.ok().body(userService.updateUserRoles(userId, appId, roleDtos));
+    public ResponseEntity<User> updateRoles(@PathVariable Long userId, @PathVariable Long appId, @RequestBody @Valid RoleDto roleDto) {
+        return ResponseEntity.ok().body(userService.updateUserRoles(userId, appId, roleDto));
+    }
+
+    @PostMapping("{userId}/system-accesses")
+    public ResponseEntity<User> addSystemAccess(@PathVariable Long userId, @RequestBody @Valid SystemAccessDto systemAccessDto) {
+        return ResponseEntity.ok().body(userService.addSystemAccess(userId, systemAccessDto));
     }
 
     @GetMapping("")

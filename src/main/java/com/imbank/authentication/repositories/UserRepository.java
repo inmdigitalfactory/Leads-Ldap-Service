@@ -10,6 +10,8 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findFirstByUsername(String username);
 
+    Optional<User> findFirstByUsernameAndEnabled(String username, boolean enabled);
+
 //    @Query(nativeQuery = true, value = "select")
 //    Optional<User> findFirstByUsernameAndApp(String username, Long id);
 }

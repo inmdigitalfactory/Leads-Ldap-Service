@@ -22,6 +22,7 @@ import org.springframework.util.ObjectUtils;
 
 import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,7 +50,7 @@ public class LdapServiceImpl implements LdapService {
 
         if(allowedApp.getModules().contains(AuthModule.userManagement)) {
             //This app has enabled user management. This user must be added to authenticate
-            User user = userRepository.findFirstByUsername(credentials.getUsername())
+            User user = userRepository.findFirstByUsernameAndEnabled(credentials.getUsername(), true)
                     .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.UNAUTHORIZED, "You are not allowed to access this service"));
             user.getSystemAccesses().stream().filter(systemAccess1 -> systemAccess1.getApp().getId().equals(allowedApp.getId())).findFirst()
                     .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.UNAUTHORIZED, "You are not allowed to access this service"));
@@ -61,7 +62,7 @@ public class LdapServiceImpl implements LdapService {
                 else if(!allowedApp.getModules().contains(AuthModule.permissionManagement)) {
                     user.setSystemAccesses(user.getSystemAccesses()
                             .stream()
-                            .peek(systemAccess -> systemAccess.getRoles().stream().peek(role -> role.setPermissions(null)))
+                            .peek(systemAccess -> systemAccess.getRole().setPermissions(null))
                             .collect(Collectors.toSet()));
                 }
                 ldapUserDTO.setUser(user);
@@ -100,28 +101,31 @@ public class LdapServiceImpl implements LdapService {
             }
 
             LdapUserDTO ldapUser = new LdapUserDTO();
+            LdapUserDTO finalLdapUser = ldapUser;
             ContextMapper<Object> contextMapper = o -> {
-
                 log.info("User found with valid credentials: {}", o);
                 Attributes a = ((DirContextAdapter) o).getAttributes();
 
-                ldapUser.setFirstName(getValue(a, "givenName"));
-                ldapUser.setLastName(getValue(a, "sn"));
-                ldapUser.setName(getValue(a, "name"));
-                ldapUser.setEmail(getValue(a, "mail"));
-                ldapUser.setDepartment(getValue(a, "department"));
-                ldapUser.setPhone(getValue(a, "phone"));
-                ldapUser.setUsername(getValue(a, "sAMAccountName"));
-                ldapUser.setDescription(getValue(a, "description"));
+                finalLdapUser.setFirstName(getValue(a, "givenName"));
+                finalLdapUser.setLastName(getValue(a, "sn"));
+                finalLdapUser.setName(getValue(a, "name"));
+                finalLdapUser.setEmail(getValue(a, "mail"));
+                finalLdapUser.setDepartment(getValue(a, "department"));
+                finalLdapUser.setPhone(getValue(a, "phone"));
+                finalLdapUser.setUsername(getValue(a, "sAMAccountName"));
+                finalLdapUser.setDescription(getValue(a, "description"));
 
-                if(ObjectUtils.isEmpty(ldapUser.getUsername())) {
-                    ldapUser.setUsername(adUsername);
+                if(ObjectUtils.isEmpty(finalLdapUser.getUsername())) {
+                    finalLdapUser.setUsername(adUsername);
                 }
-                return ldapUser;
+                return finalLdapUser;
             };
             log.info("Searching for user {}. Filter: {}", adUsername, filter.encode());
             try {
-                ldapTemplate.search(baseDn, filter.encode(), SearchControls.SUBTREE_SCOPE, contextMapper);
+                List<Object> results = ldapTemplate.search(baseDn, filter.encode(), SearchControls.SUBTREE_SCOPE, contextMapper);
+                if(ObjectUtils.isEmpty(results)) {
+                    ldapUser = null;
+                }
             }
             catch (Exception e) {//Referrals might throw errors when using port 636. Consider using port 3269
                 log.info("Some error searching for data: {}", e.getLocalizedMessage());
