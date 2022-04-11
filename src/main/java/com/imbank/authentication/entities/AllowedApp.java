@@ -37,7 +37,8 @@ public class AllowedApp extends EntityAuditor {
     private long tokenValiditySeconds;
     private long refreshTokenValiditySeconds;
     @ElementCollection(fetch = FetchType.EAGER)
-//    @ToString.Exclude
+    @ToString.Exclude
+    @Builder.Default
     private Set<AuthModule> modules = new HashSet<>(Arrays.asList(AuthModule.values()));
 
     @Override

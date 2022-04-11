@@ -18,7 +18,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(Collections.singletonList("*"));
         config.setAllowedMethods(Collections.singletonList("*"));
-        config.setAllowCredentials(true);
+//        config.setAllowCredentials(true);
         config.setAllowedHeaders(Arrays.asList("*", "Authorization"));
         return config;
     }
