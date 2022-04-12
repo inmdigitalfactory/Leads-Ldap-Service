@@ -2,7 +2,6 @@ package com.imbank.authentication.utils;
 
 import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.entities.AllowedApp;
-import com.imbank.authentication.entities.Role;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ObjectUtils;
@@ -46,7 +45,7 @@ public class JwtUtils {
         if(!ObjectUtils.isEmpty(user.getUser())) {
                 jwt.claim(CLAIM_ROLES, user.getUser().getSystemAccesses().stream()
                         .filter(systemAccess -> systemAccess.getApp().getId().equals(app.getId()))
-                        .map(systemAccess -> systemAccess.getRoles().stream().map(Role::getName).collect(Collectors.joining()))
+                        .map(systemAccess -> systemAccess.getRole().getName())
                         .collect(Collectors.toSet()));
                 List<String> permissions = new ArrayList<>();
                 if(isLdapService) {
@@ -55,8 +54,8 @@ public class JwtUtils {
                             .getSystemAccesses()
                             .stream().filter(systemAccess -> systemAccess.getApp().getId().equals(app.getId()))
                             .forEach(userRole ->
-                                    userRole.getRoles()
-                                            .forEach(role -> role.getPermissions().forEach(permission -> {
+                                    userRole.getRole()
+                                            .getPermissions().forEach(permission -> {
                                                 if(!ObjectUtils.isEmpty(userRole.getApps())) {
                                                     userRole.getApps()
                                                             .forEach(a ->
@@ -66,16 +65,15 @@ public class JwtUtils {
                                                 else {
                                                     permissions.add(permission.getCode());
                                                 }
-                                            })));
+                                            }));
                 }
                 else {
                     user.getUser()
                             .getSystemAccesses()
                             .stream().filter(systemAccess -> systemAccess.getApp().getId().equals(app.getId()))
                             .forEach(userRole ->
-                                    userRole.getRoles()
-                                            .forEach(role -> role.getPermissions().forEach(permission ->
-                                                    permissions.add(permission.getCode())))
+                                    userRole.getRole().getPermissions().forEach(permission ->
+                                                    permissions.add(permission.getCode()))
                                            );
                 }
                 jwt.claim(CLAIM_PERMISSIONS, permissions);

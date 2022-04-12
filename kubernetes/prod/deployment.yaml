@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ldap-service
+  name: ldap-service
+  labels:
+    name: ldap-service
+    app: ldap-service
+spec:
+  selector:
+    matchLabels:
+      app: ldap-service
+  template:
+    metadata:
+      name: ldap-service
+      labels:
+        name: ldap-service
+        app: ldap-service
+    spec:
+      containers:
+        - name: ldap-service
+          imagePullPolicy: Always
+          image: iandm/ldap-service-backend:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ldap-service-database
+                  key: url
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ldap-service-database
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ldap-service-database
+                  key: password

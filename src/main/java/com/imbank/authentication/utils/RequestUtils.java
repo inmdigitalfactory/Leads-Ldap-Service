@@ -51,14 +51,15 @@ public class RequestUtils {
         return request.getRemoteAddr();
     }
 
-    public static void setupTrustStore() {
+    public static void setupTrustStore(String certFileName) {
         final String KS_PASSWORD = "imbank";
         try {
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
             ks.load(null, KS_PASSWORD.toCharArray());
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
-            try (InputStream cert = new ClassPathResource("ldapserver.cer").getInputStream()) {
+
+            try (InputStream cert = new ClassPathResource(certFileName).getInputStream()) {
                 Certificate certificate = cf.generateCertificate(cert);
                 ks.setCertificateEntry("imbank", certificate);
             }

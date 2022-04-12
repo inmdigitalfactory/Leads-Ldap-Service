@@ -1,5 +1,6 @@
 package com.imbank.authentication.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -10,7 +11,7 @@ import java.util.Set;
 @Setter
 @ToString
 @NoArgsConstructor
-@Table(name = "user_roles")
+@Table(name = "system_accesses")
 @Builder
 @AllArgsConstructor
 public class SystemAccess extends EntityAuditor {
@@ -22,10 +23,13 @@ public class SystemAccess extends EntityAuditor {
     @OneToOne
     @JoinColumn(name = "app_id")
     private AllowedApp app;
-    @ToString.Exclude
-    @OneToMany(fetch = FetchType.EAGER)
-    @Builder.Default
-    private Set<Role> roles = new java.util.LinkedHashSet<>();
+    @OneToOne
+    @JsonBackReference
+    @JoinColumn(name = "user_id")
+    private User user;
+    @OneToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<AllowedApp> apps;//applicable to only ldap service
 

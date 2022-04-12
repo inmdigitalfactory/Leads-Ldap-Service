@@ -16,16 +16,16 @@ import java.util.Objects;
 @Setter
 @ToString
 @RequiredArgsConstructor
-@Table(name = "permissions")
+@Table(name = "sys_permissions")
 public class Permission extends EntityAuditor {
     @Id
     @GeneratedValue
     private Long id;
 
     private String code;
-    private boolean description;
-    @ManyToOne
-    @JoinColumn(name = "access_app_id")
+    private String description;
+    @OneToOne
+    private AllowedApp app;
 
 
     @Override

@@ -89,19 +89,34 @@ public class Seeder {
                 adminRole = roleRepository.save(adminRole);
             }
 
-            String username = "einstein";
+            String username = "Emmanuel.Zeye";
             Optional<User> adminUserOptional = userRepository.findFirstByUsername(username);
             User adminUser;
             if(adminUserOptional.isEmpty()) {
-                adminUser = User.builder().username(username).baseDn("dc=example,dc=com").build();
+                adminUser = User.builder().username(username)
+                        .email("emmanuel.zeye@imbank.co.ke")
+                        .phone("233245089490")
+                        .department("Andela Contractor")
+                        .firstName("Emmanuel")
+                        .lastName("Zeye")
+                        .enabled(true)
+                        .name("Emmanuel Zeye")
+                        .baseDn("OU=ICUBE,DC=imbl,DC=corp")
+                        .build();
             }
             else {
                 adminUser = adminUserOptional.get();
             }
+            adminUser = userRepository.save(adminUser);
             if(ObjectUtils.isEmpty(adminUser.getSystemAccesses())) {
-                SystemAccess systemAccess = systemAccessRepository.save(SystemAccess.builder().roles(Set.of(adminRole)).build());
-                adminUser.setSystemAccesses(Set.of(systemAccess));
-                userRepository.save(adminUser);
+                SystemAccess systemAccess = systemAccessRepository
+                        .save(SystemAccess.builder()
+                            .role(adminRole)
+                                .user(adminUser)
+                            .app(app)
+                            .build()
+                );
+//                adminUser.setSystemAccesses(Set.of(systemAccess));
             }
         };
     }

@@ -2,6 +2,7 @@ package com.imbank.authentication.services;
 
 import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.dtos.RoleDto;
+import com.imbank.authentication.dtos.SystemAccessDto;
 import com.imbank.authentication.dtos.UserDto;
 import com.imbank.authentication.entities.User;
 
@@ -17,8 +18,9 @@ public interface UserService {
     User getUser(long id);
     void deleteUser(long id);
 
-    User updateUserRoles(Long id, Long app, List<RoleDto> roleDto);
+    User updateUserRoles(Long userId, Long appId, RoleDto roleDto);
     LdapUserDTO searchUser(String username);
 
 
+    User addSystemAccess(Long userId, SystemAccessDto systemAccessDto);
 }
