@@ -14,6 +14,7 @@ public class LdapUserDTO {
     private String name;
     private String department;
     private String description;
+    private String baseDn;
     @JsonIgnore
     private User user;
 }

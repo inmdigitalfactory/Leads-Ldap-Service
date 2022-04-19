@@ -1,5 +1,6 @@
 package com.imbank.authentication.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -34,8 +35,10 @@ public class User extends EntityAuditor {
     private String lastName;
     private String email;
     private String phone;
-    private String description;    @OneToMany(fetch = FetchType.EAGER)
+    private String description;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
     @ToString.Exclude
+    @JsonManagedReference
     private Set<SystemAccess> systemAccesses;
     private String username;
     private String baseDn;

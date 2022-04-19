@@ -78,8 +78,10 @@ public class Seeder {
             }
 
             if(permissionRepository.count() == 0) {
+                AllowedApp finalApp = app;
                 allPermissions = new HashSet<>(permissionRepository.saveAll(Arrays.stream(AppPermission.values()).map(p -> {
                     Permission perm = new Permission();
+                    perm.setApp(finalApp);
                     perm.setCode(p.name());
                     return perm;
                 }).collect(Collectors.toSet())));
@@ -89,24 +91,35 @@ public class Seeder {
                 adminRole = roleRepository.save(adminRole);
             }
 
-            String username = "melisa.juma";
+
+            String username = "Emmanuel.Zeye";
             Optional<User> adminUserOptional = userRepository.findFirstByUsername(username);
             User adminUser;
             if(adminUserOptional.isEmpty()) {
-                adminUser = User.builder().username(username).baseDn("OU=ICUBE,DC=imbl,DC=corp").build();
+                adminUser = User.builder().username(username)
+                        .email("emmanuel.zeye@imbank.co.ke")
+                        .phone("233245089490")
+                        .department("Andela Contractor")
+                        .firstName("Emmanuel")
+                        .lastName("Zeye")
+                        .enabled(true)
+                        .name("Emmanuel Zeye")
+                        .baseDn("OU=PROJECTS,DC=imbl,DC=corp")
+                        .build();
             }
             else {
                 adminUser = adminUserOptional.get();
             }
+            adminUser = userRepository.save(adminUser);
             if(ObjectUtils.isEmpty(adminUser.getSystemAccesses())) {
                 SystemAccess systemAccess = systemAccessRepository
                         .save(SystemAccess.builder()
-                            .roles(Set.of(adminRole))
+                            .role(adminRole)
+                                .user(adminUser)
                             .app(app)
                             .build()
                 );
-                adminUser.setSystemAccesses(Set.of(systemAccess));
-                userRepository.save(adminUser);
+//                adminUser.setSystemAccesses(Set.of(systemAccess));
             }
         };
     }

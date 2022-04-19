@@ -16,7 +16,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @RequiredArgsConstructor
-@Table(name = "permissions")
+@Table(name = "sys_permissions")
 public class Permission extends EntityAuditor {
     @Id
     @GeneratedValue

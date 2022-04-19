@@ -11,7 +11,9 @@ import com.imbank.authentication.exceptions.AuthenticationExceptionImpl;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -91,12 +93,25 @@ public class AuthUtils {
 
     public static Optional<String> getLoggedInUser() {
         try {
-            Claims claims = (Claims) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            log.info("Currently logged in user is {} - {}", claims.getSubject(), claims);
-            return Optional.ofNullable(claims.getSubject());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if(authentication.getPrincipal() instanceof Claims) {
+                Claims claims = (Claims) authentication.getPrincipal();
+                log.info("Currently logged in user is {} - {}", claims.getSubject(), claims);
+                return Optional.ofNullable(claims.getSubject());
+            }
+            if(authentication.getPrincipal() instanceof Saml2AuthenticatedPrincipal) {
+                Saml2AuthenticatedPrincipal saml2AuthenticatedPrincipal = (Saml2AuthenticatedPrincipal) authentication.getPrincipal();
+                log.info("Currently logged in user is {}", saml2AuthenticatedPrincipal.getAttributes());
+                return Optional.ofNullable(saml2AuthenticatedPrincipal.getName());
+            }
+        } catch (Exception ignored) {}
         return Optional.empty();
+    }
+
+    public static String getPermissions() {
+        Claims claims = (Claims) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        log.info("Claims: {}", claims);
+        List<String> permissions = (List<String>) claims.get(CLAIM_PERMISSIONS);
+        return String.join(",", permissions);
     }
 }
