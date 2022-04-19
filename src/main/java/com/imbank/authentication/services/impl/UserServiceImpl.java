@@ -150,7 +150,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(long id) {
         User user = userRepository.findById(id).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "Unknown user"));
-        AuthUtils.ensurePermitted(user.getSystemAccesses(), List.of(AppPermission.deleteUser));
+        AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.deleteUser));
         userRepository.delete(user);
     }
 
