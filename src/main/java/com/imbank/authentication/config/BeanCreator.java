@@ -16,6 +16,7 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 
 @Component
@@ -31,18 +32,18 @@ public class BeanCreator {
     @Value("${spring.ldap.password}")
     private String ldapPrincipalPassword;
 
-    @Bean
+    @Bean("keystore")
     @Profile({"dev", "uat"})
-    public void setupSecureLdap() {
+    public KeyStore setupSecureLdap() {
         log.info("=========================================DEV");
-        RequestUtils.setupTrustStore("ldapserver.cer");
+        return RequestUtils.setupTrustStore("ldapserver.cer");
     }
 
-    @Bean
+    @Bean("keystore")
     @Profile({"prod"})
-    public void setupSecureLdapProd() {
+    public KeyStore setupSecureLdapProd() {
         log.info("=========================================PROD");
-        RequestUtils.setupTrustStore("ldapserver.prod.cer");
+        return RequestUtils.setupTrustStore("ldapserver.prod.cer");
     }
 
 
