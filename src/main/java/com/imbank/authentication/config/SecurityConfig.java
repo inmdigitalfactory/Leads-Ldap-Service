@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -358,6 +359,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      * @return JKSKeyManager
      */
     @Bean
+    @DependsOn("keystore")
     public JKSKeyManager keyManager() {
         Resource storeFile = new FileSystemResource(new File(Constants.KEYSTORE_FILE_NAME));
         Map<String, String> passwords = new HashMap<>();
