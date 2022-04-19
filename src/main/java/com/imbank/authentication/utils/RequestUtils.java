@@ -69,7 +69,6 @@ public class RequestUtils {
                 KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
                 keyPairGenerator.initialize(2048);
                 KeyPair keyPair  = keyPairGenerator.generateKeyPair();
-                log.info("Key pair : {} - {}", keyPair.getPrivate().getAlgorithm(), keyPair.getPrivate().getFormat());
 
                 try {
                     Certificate c = CertUtils.selfSign(keyPair, "dc=example.com");

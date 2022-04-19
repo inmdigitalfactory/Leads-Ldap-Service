@@ -2,9 +2,7 @@ package com.imbank.authentication.utils;
 
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.stream.Collectors;
 
 public final class FileUtils {
@@ -15,6 +13,11 @@ public final class FileUtils {
 		String lines = br.lines().collect(Collectors.joining());
 		br.close();
 		return lines;
+	}
+
+	public static byte[] readFileBytes(String fileName) throws IOException {
+		ClassPathResource cpr = new ClassPathResource(fileName);
+		return cpr.getInputStream().readAllBytes();
 	}
 
 }
