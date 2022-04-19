@@ -78,8 +78,10 @@ public class Seeder {
             }
 
             if(permissionRepository.count() == 0) {
+                AllowedApp finalApp = app;
                 allPermissions = new HashSet<>(permissionRepository.saveAll(Arrays.stream(AppPermission.values()).map(p -> {
                     Permission perm = new Permission();
+                    perm.setApp(finalApp);
                     perm.setCode(p.name());
                     return perm;
                 }).collect(Collectors.toSet())));
@@ -101,7 +103,7 @@ public class Seeder {
                         .lastName("Zeye")
                         .enabled(true)
                         .name("Emmanuel Zeye")
-                        .baseDn("OU=ICUBE,DC=imbl,DC=corp")
+                        .baseDn("OU=PROJECTS,DC=imbl,DC=corp")
                         .build();
             }
             else {

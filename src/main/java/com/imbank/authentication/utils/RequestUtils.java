@@ -10,9 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -52,24 +50,43 @@ public class RequestUtils {
     }
 
     public static void setupTrustStore(String certFileName) {
-        final String KS_PASSWORD = "imbank";
         try {
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            ks.load(null, KS_PASSWORD.toCharArray());
+            ks.load(null, Constants.KEYSTORE_PASSWORD.toCharArray());
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
-
 
             try (InputStream cert = new ClassPathResource(certFileName).getInputStream()) {
                 Certificate certificate = cf.generateCertificate(cert);
                 ks.setCertificateEntry("imbank", certificate);
             }
-            File keystore = new File("ldapserver.jks").getAbsoluteFile();
+//            try (InputStream cert = new ClassPathResource("saml.crt").getInputStream()) {
+//                File verificationKey = new ClassPathResource("saml.crt").getFile();
+//                X509Certificate certificate = X509Support.decodeCertificate(verificationKey);
+//                ks.setCertificateEntry(Constants.KEYSTORE_KEY, certificate);
+//            }
+            try {
+                KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+                keyPairGenerator.initialize(2048);
+                KeyPair keyPair  = keyPairGenerator.generateKeyPair();
+                log.info("Key pair : {} - {}", keyPair.getPrivate().getAlgorithm(), keyPair.getPrivate().getFormat());
+
+                try {
+                    Certificate c = CertUtils.selfSign(keyPair, "dc=example.com");
+                    ks.setCertificateEntry(Constants.KEYSTORE_KEY, c);
+                    ks.setKeyEntry(Constants.KEYSTORE_KEY, keyPair.getPrivate(), Constants.KEYSTORE_PASSWORD.toCharArray(), new Certificate[]{c});
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            catch (Exception ignored){
+                ignored.printStackTrace();
+            }
+
+            File keystore = new File(Constants.KEYSTORE_FILE_NAME).getAbsoluteFile();
             try (FileOutputStream fos = new FileOutputStream(keystore)) {
-                ks.store(fos, KS_PASSWORD.toCharArray());
+                ks.store(fos, Constants.KEYSTORE_PASSWORD.toCharArray());
             }
             log.info("Setting truststore to {}", keystore.getAbsolutePath());
-            System.setProperty("javax.net.ssl.trustStore", keystore.getAbsolutePath());
-            System.setProperty("javax.net.ssl.trustStorePassword", KS_PASSWORD);
         } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
