@@ -49,9 +49,10 @@ public class RequestUtils {
         return request.getRemoteAddr();
     }
 
-    public static void setupTrustStore(String certFileName) {
+    public static KeyStore setupTrustStore(String certFileName) {
+        KeyStore ks = null;
         try {
-            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+            ks = KeyStore.getInstance(KeyStore.getDefaultType());
             ks.load(null, Constants.KEYSTORE_PASSWORD.toCharArray());
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
@@ -90,5 +91,6 @@ public class RequestUtils {
         } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+        return ks;
     }
 }
