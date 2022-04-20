@@ -1,6 +1,7 @@
 package com.imbank.authentication.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.bcel.Const;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -69,18 +70,13 @@ public class RequestUtils {
                 KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
                 keyPairGenerator.initialize(2048);
                 KeyPair keyPair  = keyPairGenerator.generateKeyPair();
-                log.info("Key pair : {} - {}", keyPair.getPrivate().getAlgorithm(), keyPair.getPrivate().getFormat());
 
-                try {
-                    Certificate c = CertUtils.selfSign(keyPair, "dc=example.com");
-                    ks.setCertificateEntry(Constants.KEYSTORE_KEY, c);
-                    ks.setKeyEntry(Constants.KEYSTORE_KEY, keyPair.getPrivate(), Constants.KEYSTORE_PASSWORD.toCharArray(), new Certificate[]{c});
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                Certificate c = CertUtils.selfSign(keyPair, "dc=example.com");
+                ks.setCertificateEntry(Constants.KEYSTORE_KEY, c);
+                ks.setKeyEntry(Constants.KEYSTORE_KEY, keyPair.getPrivate(), Constants.KEYSTORE_PASSWORD.toCharArray(), new Certificate[]{c});
             }
-            catch (Exception ignored){
-                ignored.printStackTrace();
+            catch (Exception e){
+                e.printStackTrace();
             }
 
             File keystore = new File(Constants.KEYSTORE_FILE_NAME).getAbsoluteFile();
@@ -88,6 +84,8 @@ public class RequestUtils {
                 ks.store(fos, Constants.KEYSTORE_PASSWORD.toCharArray());
             }
             log.info("Setting truststore to {}", keystore.getAbsolutePath());
+            System.setProperty("javax.net.ssl.trustStore", keystore.getAbsolutePath());
+            System.setProperty("javax.net.ssl.trustStorePassword", Constants.KEYSTORE_PASSWORD);
         } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
