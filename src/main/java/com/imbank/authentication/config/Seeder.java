@@ -92,7 +92,7 @@ public class Seeder {
             }
 
             String username = "Emmanuel.Zeye";
-            Optional<User> adminUserOptional = userRepository.findFirstByUsername(username);
+            Optional<User> adminUserOptional = userRepository.findFirstByUsernameIgnoreCase(username);
             User adminUser;
             if(adminUserOptional.isEmpty()) {
                 adminUser = User.builder().username(username)
