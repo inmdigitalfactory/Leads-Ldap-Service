@@ -50,7 +50,7 @@ public class LdapServiceImpl implements LdapService {
 
         if(allowedApp.getModules().contains(AuthModule.userManagement)) {
             //This app has enabled user management. This user must be added to authenticate
-            User user = userRepository.findFirstByUsernameAndEnabled(credentials.getUsername(), true)
+            User user = userRepository.findFirstByUsernameIgnoreCaseAndEnabled(credentials.getUsername(), true)
                     .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.UNAUTHORIZED, "You are not allowed to access this service"));
             user.getSystemAccesses().stream().filter(systemAccess1 -> systemAccess1.getApp().getId().equals(allowedApp.getId())).findFirst()
                     .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.UNAUTHORIZED, "You are not allowed to access this service"));

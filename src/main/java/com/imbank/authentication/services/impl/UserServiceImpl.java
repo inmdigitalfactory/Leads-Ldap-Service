@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
         AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.createUser));
 
         //ensure the user has not already been added to the ldap service
-        Optional<User> optionalUser = userRepository.findFirstByUsername(userDto.getUsername());
+        Optional<User> optionalUser = userRepository.findFirstByUsernameIgnoreCase(userDto.getUsername());
         if(optionalUser.isPresent()) {
             throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST, "User is already created. Please proceed to add a system that this user can access");
         }
@@ -151,6 +151,7 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(long id) {
         User user = userRepository.findById(id).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "Unknown user"));
         AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.deleteUser));
+        systemAccessRepository.deleteAll(user.getSystemAccesses());
         userRepository.delete(user);
     }
 
