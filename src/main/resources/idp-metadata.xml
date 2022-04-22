@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" ID="_fe2c2e77106966c1e2b4b6ac702d8c8c039e9e79" entityID="https://imbank.auth-eu.securid.com/saml-fe/sso">
+    <md:IDPSSODescriptor ID="_13e037663bae83d61d646e171c772a34d19e8b66" WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+        <md:KeyDescriptor use="signing">
+            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                <ds:KeyName>imbank</ds:KeyName>
+                <ds:X509Data>
+                    <ds:X509SubjectName>L=imbank:SAML_SIGNING_2:be075a80-f1c4-41cf-9c9e-c0ba53212d57:ONE,CN=5c4e3ca1f72f074a3bb66e92c3afe6b4d1525e8f19a75e29a36219adfbdcbf2c,OU=SecurID Access,O=RSA,C=US</ds:X509SubjectName>
+                    <ds:X509IssuerSerial>
+                        <ds:X509IssuerName>L=imbank:SAML_SIGNING_2:be075a80-f1c4-41cf-9c9e-c0ba53212d57:ONE,CN=5c4e3ca1f72f074a3bb66e92c3afe6b4d1525e8f19a75e29a36219adfbdcbf2c,OU=SecurID Access,O=RSA,C=US</ds:X509IssuerName>
+                        <ds:X509SerialNumber>79357261665475922609046712376026945305874926109</ds:X509SerialNumber>
+                    </ds:X509IssuerSerial>
+                    <ds:X509Certificate>MIIEUTCCAzmgAwIBAgIUDeaAr/YTVjPQFAT7KbHCrUbqCh0wDQYJKoZIhvcNAQELBQAwgcgxCzAJ
+                        BgNVBAYTAlVTMQwwCgYDVQQKDANSU0ExFzAVBgNVBAsMDlNlY3VySUQgQWNjZXNzMUkwRwYDVQQD
+                        DEA1YzRlM2NhMWY3MmYwNzRhM2JiNjZlOTJjM2FmZTZiNGQxNTI1ZThmMTlhNzVlMjlhMzYyMTlh
+                        ZGZiZGNiZjJjMUcwRQYDVQQHDD5pbWJhbms6U0FNTF9TSUdOSU5HXzI6YmUwNzVhODAtZjFjNC00
+                        MWNmLTljOWUtYzBiYTUzMjEyZDU3Ok9ORTAeFw0yMDAzMTExNzI1MjhaFw00MDAzMTExNzI1Mjha
+                        MIHIMQswCQYDVQQGEwJVUzEMMAoGA1UECgwDUlNBMRcwFQYDVQQLDA5TZWN1cklEIEFjY2VzczFJ
+                        MEcGA1UEAwxANWM0ZTNjYTFmNzJmMDc0YTNiYjY2ZTkyYzNhZmU2YjRkMTUyNWU4ZjE5YTc1ZTI5
+                        YTM2MjE5YWRmYmRjYmYyYzFHMEUGA1UEBww+aW1iYW5rOlNBTUxfU0lHTklOR18yOmJlMDc1YTgw
+                        LWYxYzQtNDFjZi05YzllLWMwYmE1MzIxMmQ1NzpPTkUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw
+                        ggEKAoIBAQCs24lRMnoSO36cZWAWcInDFCM5PwG1hJJVNxOrg0p7+V1aL/cDMv17PqdVpvVmzdup
+                        GHlYkt2wjRiCU7viPxcKPdAK8nPygyRIsG7UkxSxSdZQhwPclATXozGMd+R2Qt01NOWuA1rblI7K
+                        NKirc0k4Hg3yTZvMWNj3camFGXRLtd/q2NsXFnifjmD+dI1YKmSsbBCAEDe/1H1S/k8Gt/0kjH0y
+                        +FpueMUR+WvmJjlgpBVyeruhuB0+ojMzAoo9xeCYGjstd3xwsSFljS0WZCds4yCHJB4f0uHagpF2
+                        eMsmW0WqP9V/l4i7BHGRDIaaZitx0bIUO1AAS4mJOVXZeH27AgMBAAGjMTAvMA4GA1UdDwEB/wQE
+                        AwIGwDAdBgNVHQ4EFgQUYOKkuOFS5vyYuS55U/orX49YkfAwDQYJKoZIhvcNAQELBQADggEBABmp
+                        +Le8vzlovDfgyR1lMW8MbXSjrI63NJTV715o4JN914ab3MzmanZO49e+Y83xX7CaIg1WGNXBkB3L
+                        AzmFu59pv/UUGczuWTjrR1Sm0w9fstPTv05OoSq75zFEgawOjXM1jZ26FodaGNgMRXWNcLTxNjwx
+                        xotFhHFbTiCOP3K8OF9cvXow9elhIC2i1o3Wr9bBPyHY9YfN9hjo468pmV+Irc2bJdE6J981I9jS
+                        CuBfnAAIAT8+RTqybWRsUEH9yTALTlUesChuKRspKk5TRE3cL09KYe+dPwxIqdlu+VV3gBdSWT2o
+                        XxRqGI7cT9AUU+Nj5HLKawFjnpJNXxOanTI=</ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </md:KeyDescriptor>
+        <md:Organization>
+            <md:OrganizationName xml:lang="en">RSA SecurID</md:OrganizationName>
+            <md:OrganizationDisplayName xml:lang="en">RSA SecurID</md:OrganizationDisplayName>
+            <md:OrganizationURL xml:lang="en">http://rsa.com</md:OrganizationURL>
+        </md:Organization>
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName</md:NameIDFormat>
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:entity</md:NameIDFormat>
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://imbank.auth-eu.securid.com/saml-fe/sso"/>
+        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://imbank.auth-eu.securid.com/saml-fe/sso"/>
+    </md:IDPSSODescriptor>
+</md:EntityDescriptor>
