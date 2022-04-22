@@ -14,7 +14,7 @@ import com.imbank.authentication.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.opensaml.saml2.metadata.provider.HTTPMetadataProvider;
+import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.xml.parse.StaticBasicParserPool;
@@ -508,9 +508,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Bean
     public ExtendedMetadataDelegate idpExtendedMetadataProvider() throws MetadataProviderException {
-        HTTPMetadataProvider httpMetadataProvider = new HTTPMetadataProvider(backgroundTimer(), httpClient(), idpMetadataUrl);
-        httpMetadataProvider.setParserPool(parserPool());
-        ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(httpMetadataProvider, extendedMetadata());
+//        HTTPMetadataProvider httpMetadataProvider = new HTTPMetadataProvider(backgroundTimer(), httpClient(), idpMetadataUrl);
+//        httpMetadataProvider.setParserPool(parserPool());
+//        ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(httpMetadataProvider, extendedMetadata());
+        FilesystemMetadataProvider metadataProvider = new FilesystemMetadataProvider(new File(System.getProperty("user.home"),"idp-metadata.xml"));
+        metadataProvider.setParserPool(parserPool());
+        ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(metadataProvider, extendedMetadata());
         extendedMetadataDelegate.setMetadataTrustCheck(true);
         extendedMetadataDelegate.setMetadataRequireSignature(false);
         return extendedMetadataDelegate;
