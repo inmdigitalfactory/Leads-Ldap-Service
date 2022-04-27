@@ -1,7 +1,6 @@
 package com.imbank.authentication.services.impl;
 
 import com.imbank.authentication.dtos.AllowedAppDto;
-import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.entities.AllowedApp;
 import com.imbank.authentication.enums.AppPermission;
 import com.imbank.authentication.exceptions.AuthenticationExceptionImpl;
@@ -32,7 +31,7 @@ public class AppServiceImpl implements AppService {
         String accessToken = AuthUtils.generateAccessToken();
         allowedApp.setAccessToken(accessToken);
         allowedApp.setTokenValiditySeconds(allowedAppDto.getTokenValiditySeconds());
-        allowedApp.setEnabled(allowedAppDto.isEnabled());
+        allowedApp.setEnabled(allowedAppDto.getEnabled());
 
         return allowedAppRepository.save(allowedApp);
     }
@@ -54,7 +53,7 @@ public class AppServiceImpl implements AppService {
         AllowedApp allowedApp = allowedAppRepository.findById(id)
                 .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "No such application"));
         AuthUtils.ensurePermitted(allowedApp, List.of(AppPermission.updateApp));
-        allowedApp.setEnabled(allowedAppDto.isEnabled());
+        allowedApp.setEnabled(allowedAppDto.getEnabled());
         allowedApp.setTokenValiditySeconds(allowedAppDto.getTokenValiditySeconds());
         allowedApp.setRefreshTokenValiditySeconds(allowedAppDto.getRefreshTokenValiditySeconds());
         return allowedAppRepository.save(allowedApp);

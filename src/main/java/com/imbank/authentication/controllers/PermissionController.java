@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -22,7 +23,7 @@ public class PermissionController {
     }
 
     @PostMapping("{appId}")
-    public ResponseEntity<Permission> addAppPermission(@PathVariable Long appId, @RequestBody PermissionDto permissionDto) {
+    public ResponseEntity<Permission> addAppPermission(@PathVariable Long appId, @RequestBody @Valid PermissionDto permissionDto) {
         return ResponseEntity.ok(permissionService.addAppPermission(appId, permissionDto));
     }
 
