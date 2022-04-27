@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" ID="co.ke.imbank.ldap-service"
+                     entityID="co.ke.imbank.ldap-service">
+    <md:SPSSODescriptor AuthnRequestsSigned="true" WantAssertionsSigned="true"
+                        protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+        <md:KeyDescriptor use="signing">
+            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                <ds:X509Data>
+                    <ds:X509Certificate>MIICszCCAZsCBgGAZUrElDANBgkqhkiG9w0BAQsFADAdMRswGQYKCZImiZPyLGQBGRYLZXhhbXBs
+                        ZS5jb20wHhcNMjIwNDI1MDk1NDAwWhcNNDIwNDIxMDk1NDAwWjAdMRswGQYKCZImiZPyLGQBGRYL
+                        ZXhhbXBsZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCKcmyPlNgeJoVQMtrb
+                        W5zGvy7/YXSshB9Nu0jtxXXCdVXfwRqky3exlcRnYw8DlJ02mSf6vQivkbVyOUZexDWwTHff53IQ
+                        1ti4FcOzx3nnAFnQE0oyy53uyQLRI306Wr0f+DGzI0u2FK4piJnZYg1cAqy+1r9jw+iWIa8tRQN8
+                        HRHK+Vom2Hitw7Xy6FBGKQeC9Z3EhveuPyqaawIG0/mg3OpLfS8YHds4zQ/w8ASYC2tH6kaZNQoU
+                        +M6vLFgBNYilfGB6ckXheE8nDqzv/ZWkjzOaRcnE0nQBJMRinsZNrEr1hEdm7e3R8GE4594TDXm7
+                        9Rx9ewxYU/9MTht1LqDZAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAFDMG2UdBt9RIYg7ALROcYf4
+                        DhApzQHRMZHvuiymp8TCoiLEFr/P8wkbOGT3PFxJRTRveXJCj/crlgOjZHpRMFxTnibVwwsg5K0m
+                        TWMzMeAS1l4eAwfo8VRDbmFxEitbkBMDPnS+2CTt6vIqF8Yf/SVaL0LAKZCoxtEm8VLtLCqUHkIU
+                        X0z7LMqLzZiIveMoirBG2lWj9BgKi8v2vMCZ0dHByODiabJCs93E1iJo7WzgZxcC6+MiLIUc2Py6
+                        Q7EdwoSWh9S9pTQSYBsuQTsmiH+9FYZNaPIaYNlgBKprtuvhiXAEEoCp5xI75KQUD3MuBeQ091iF
+                        4kCkxp4QtCEskkA=
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </md:KeyDescriptor>
+        <md:KeyDescriptor use="encryption">
+            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                <ds:X509Data>
+                    <ds:X509Certificate>MIICszCCAZsCBgGAZUrElDANBgkqhkiG9w0BAQsFADAdMRswGQYKCZImiZPyLGQBGRYLZXhhbXBs
+                        ZS5jb20wHhcNMjIwNDI1MDk1NDAwWhcNNDIwNDIxMDk1NDAwWjAdMRswGQYKCZImiZPyLGQBGRYL
+                        ZXhhbXBsZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCKcmyPlNgeJoVQMtrb
+                        W5zGvy7/YXSshB9Nu0jtxXXCdVXfwRqky3exlcRnYw8DlJ02mSf6vQivkbVyOUZexDWwTHff53IQ
+                        1ti4FcOzx3nnAFnQE0oyy53uyQLRI306Wr0f+DGzI0u2FK4piJnZYg1cAqy+1r9jw+iWIa8tRQN8
+                        HRHK+Vom2Hitw7Xy6FBGKQeC9Z3EhveuPyqaawIG0/mg3OpLfS8YHds4zQ/w8ASYC2tH6kaZNQoU
+                        +M6vLFgBNYilfGB6ckXheE8nDqzv/ZWkjzOaRcnE0nQBJMRinsZNrEr1hEdm7e3R8GE4594TDXm7
+                        9Rx9ewxYU/9MTht1LqDZAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAFDMG2UdBt9RIYg7ALROcYf4
+                        DhApzQHRMZHvuiymp8TCoiLEFr/P8wkbOGT3PFxJRTRveXJCj/crlgOjZHpRMFxTnibVwwsg5K0m
+                        TWMzMeAS1l4eAwfo8VRDbmFxEitbkBMDPnS+2CTt6vIqF8Yf/SVaL0LAKZCoxtEm8VLtLCqUHkIU
+                        X0z7LMqLzZiIveMoirBG2lWj9BgKi8v2vMCZ0dHByODiabJCs93E1iJo7WzgZxcC6+MiLIUc2Py6
+                        Q7EdwoSWh9S9pTQSYBsuQTsmiH+9FYZNaPIaYNlgBKprtuvhiXAEEoCp5xI75KQUD3MuBeQ091iF
+                        4kCkxp4QtCEskkA=
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </md:KeyDescriptor>
+        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+                                Location="http://localhost:80900./saml/SingleLogout"/>
+        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                                Location="http://localhost:80900./saml/SingleLogout"/>
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName</md:NameIDFormat>
+        <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+                                     Location="http://localhost:80900./saml/SSO" index="0" isDefault="true"/>
+        <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
+                                     Location="http://localhost:80900./saml/SSO" index="1"/>
+    </md:SPSSODescriptor>
+</md:EntityDescriptor>

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -22,7 +23,7 @@ public class RoleController {
     }
 
     @PostMapping("{appId}")
-    public ResponseEntity<Role> addAppRole(@PathVariable Long appId, @RequestBody AppRoleDto roleDto) {
+    public ResponseEntity<Role> addAppRole(@PathVariable Long appId, @RequestBody @Valid AppRoleDto roleDto) {
         return ResponseEntity.ok(roleService.addAppRole(appId, roleDto));
     }
 

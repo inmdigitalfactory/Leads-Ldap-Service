@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" ID="_fe2c2e77106966c1e2b4b6ac702d8c8c039e9e79" entityID="https://imbank.auth-eu.securid.com/saml-fe/sso">
-    <md:IDPSSODescriptor ID="_13e037663bae83d61d646e171c772a34d19e8b66" WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" ID="_67d982f19df322c59749ddd7b24fcd954271775a" entityID="https://imbank.auth-eu.securid.com/saml-fe/sso">
+    <md:IDPSSODescriptor ID="_d56bf82dd2afa444780c2df03834aec36baf8489" WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
         <md:KeyDescriptor use="signing">
             <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
                 <ds:KeyName>imbank</ds:KeyName>
