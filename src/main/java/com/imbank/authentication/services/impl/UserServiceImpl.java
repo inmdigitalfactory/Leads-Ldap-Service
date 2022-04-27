@@ -23,10 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -59,7 +56,8 @@ public class UserServiceImpl implements UserService {
         //ensure the user has not already been added to the ldap service
         Optional<User> optionalUser = userRepository.findFirstByUsername(userDto.getUsername());
         if(optionalUser.isPresent()) {
-            throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST, "User is already created. Please proceed to add a system that this user can access");
+            throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST, "User is already cr" +
+                    "eated. Please proceed to add a system that this user can access");
         }
 
         //Ensure the user being created is in the the Active directory

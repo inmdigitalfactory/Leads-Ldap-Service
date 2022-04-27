@@ -92,20 +92,12 @@ public class Seeder {
             }
 
 
-            String username = "Emmanuel.Zeye";
+            String username = "einstein";
             Optional<User> adminUserOptional = userRepository.findFirstByUsername(username);
             User adminUser;
             if(adminUserOptional.isEmpty()) {
-                adminUser = User.builder().username(username)
-                        .email("emmanuel.zeye@imbank.co.ke")
-                        .phone("233245089490")
-                        .department("Andela Contractor")
-                        .firstName("Emmanuel")
-                        .lastName("Zeye")
-                        .enabled(true)
-                        .name("Emmanuel Zeye")
-                        .baseDn("OU=PROJECTS,DC=imbl,DC=corp")
-                        .build();
+                adminUser = User.builder().username(username).baseDn("dc=example,dc=com").build();
+
             }
             else {
                 adminUser = adminUserOptional.get();
