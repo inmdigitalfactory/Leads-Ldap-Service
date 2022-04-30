@@ -9,11 +9,13 @@ import com.imbank.authentication.entities.Role;
 import com.imbank.authentication.entities.SystemAccess;
 import com.imbank.authentication.entities.User;
 import com.imbank.authentication.enums.AppPermission;
+import com.imbank.authentication.enums.AuditAction;
 import com.imbank.authentication.exceptions.AuthenticationExceptionImpl;
 import com.imbank.authentication.repositories.AllowedAppRepository;
 import com.imbank.authentication.repositories.RoleRepository;
 import com.imbank.authentication.repositories.SystemAccessRepository;
 import com.imbank.authentication.repositories.UserRepository;
+import com.imbank.authentication.services.AuditLogService;
 import com.imbank.authentication.services.LdapService;
 import com.imbank.authentication.services.UserService;
 import com.imbank.authentication.utils.AuthUtils;
@@ -23,10 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -47,13 +46,15 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private LdapService ldapService;
 
+    @Autowired
+    private AuditLogService auditLogService;
+
     @Value("${spring.ldap.base}")
     private String ldapBase;
 
     @Override
     public User createUser(UserDto userDto) {
         //see if the app exists
-//        AllowedApp allowedApp = allowedAppRepository.findById(userDto.getAppId()).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "Unknown Application"));
         AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.createUser));
 
         //ensure the user has not already been added to the ldap service
@@ -67,12 +68,6 @@ public class UserServiceImpl implements UserService {
         if(ldapUserDTO == null) {
             throw new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, String.format("No user found with username '%s' under the domain '%s'", userDto.getUsername(), ldapBase));
         }
-
-//        //ensure the user has not already been added to this app
-//        optionalUser = userRepository.findFirstByUsername(ldapUserDTO.getUsername());
-//        if(optionalUser.isPresent() && optionalUser.get().getSystemAccesses().stream().anyMatch(systemAccess -> systemAccess.getApp().getId() == userDto.getAppId())) {
-//            throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST, "User already has access to this service");
-//        }
 
         //retrieve or create this user
         User user = optionalUser.orElse(
@@ -90,28 +85,11 @@ public class UserServiceImpl implements UserService {
                         .build()
         );
 
-//        List<SystemAccess> systemAccesses = userDto.getRoles().stream().map(roleDto -> {
-//            Set<AllowedApp> apps = ObjectUtils.isEmpty(roleDto.getApps())
-//                                        ? null
-//                                        : new HashSet<>(allowedAppRepository.findAllById(roleDto.getApps()));
-//            Role role = roleRepository.findById(roleDto.getRole()).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "No such role"));
-//            return SystemAccess.builder()
-//                    .app(allowedApp)
-//                    .apps(apps)
-//                    .role(role)
-//                    .build();
-//        }).collect(Collectors.toList());
-        //assign this app and role to the user
-//        user.getSystemAccesses().addAll(systemAccessRepository.saveAll(systemAccesses));
-
         //save or update the user records
         user = userRepository.save(user);
 
-        //this app does not use userManagement module. Add it since the app has started managing users
-//        if(!allowedApp.getModules().contains(AuthModule.userManagement)) {
-//            allowedApp.getModules().add(AuthModule.userManagement);
-//            allowedAppRepository.save(allowedApp);
-//        }
+        //keep log of this activity
+        auditLogService.createAuditLog(AuditAction.addUser, null, user);
         return user;
     }
 
@@ -123,6 +101,8 @@ public class UserServiceImpl implements UserService {
         user.setBaseDn(user.getBaseDn());
 
         user = userRepository.save(user);
+        auditLogService.createAuditLog(AuditAction.updateUser, null, user);
+
         return user;
     }
 
@@ -153,6 +133,8 @@ public class UserServiceImpl implements UserService {
         AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.deleteUser));
         systemAccessRepository.deleteAll(user.getSystemAccesses());
         userRepository.delete(user);
+        auditLogService.createAuditLog(AuditAction.deleteUser, null, user);
+
     }
 
     @Override
@@ -169,11 +151,15 @@ public class UserServiceImpl implements UserService {
                 .user(user)
                 .role(role)
                 .build());
+        String oldRole = systemAccess.getRole().getName();
 
         systemAccess.setRole(role);
         //assign this app and role to the user
         user.getSystemAccesses().add(systemAccessRepository.save(systemAccess));
         user.setModifiedOn(new Date());
+
+        auditLogService.createAuditLog(AuditAction.addUser, null, user, Map.of("oldRole", oldRole, "newRole", role.getName()));
+
         return userRepository.save(user);
     }
 
@@ -194,6 +180,8 @@ public class UserServiceImpl implements UserService {
         //assign this app and role to the user
         user.getSystemAccesses().add(systemAccessRepository.save(access));
         user.setModifiedOn(new Date());
+        auditLogService.createAuditLog(AuditAction.addSystemAccess, null, user);
+
         return userRepository.save(user);
     }
 

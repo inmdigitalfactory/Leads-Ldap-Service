@@ -17,4 +17,5 @@ public class Constants {
     public static final String KEYSTORE_KEY = "saml";
     public static final String KEYSTORE_PASSWORD = "imbank";
     public static final String KEYSTORE_FILE_NAME = "ldapserver.jks";
+    public static final int PAGE_SIZE = 15;
 }
