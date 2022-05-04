@@ -3,9 +3,11 @@ package com.imbank.authentication.services.impl;
 import com.imbank.authentication.dtos.AllowedAppDto;
 import com.imbank.authentication.entities.AllowedApp;
 import com.imbank.authentication.enums.AppPermission;
+import com.imbank.authentication.enums.AuditAction;
 import com.imbank.authentication.exceptions.AuthenticationExceptionImpl;
 import com.imbank.authentication.repositories.AllowedAppRepository;
 import com.imbank.authentication.services.AppService;
+import com.imbank.authentication.services.AuditLogService;
 import com.imbank.authentication.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,9 @@ public class AppServiceImpl implements AppService {
 
     @Autowired
     private AllowedAppRepository allowedAppRepository;
+
+    @Autowired
+    private AuditLogService auditLogService;
 
     @Override
     public AllowedApp createApp(AllowedAppDto allowedAppDto) {
@@ -32,8 +37,11 @@ public class AppServiceImpl implements AppService {
         allowedApp.setAccessToken(accessToken);
         allowedApp.setTokenValiditySeconds(allowedAppDto.getTokenValiditySeconds());
         allowedApp.setEnabled(allowedAppDto.getEnabled());
+        allowedApp = allowedAppRepository.save(allowedApp);
 
-        return allowedAppRepository.save(allowedApp);
+        auditLogService.createAuditLog(AuditAction.addUser, allowedApp, null);
+        return allowedApp;
+
     }
 
     @Override
