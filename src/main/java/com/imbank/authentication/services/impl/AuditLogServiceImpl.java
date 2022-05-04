@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -29,6 +30,8 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     @Override
     public Page<AuditLog> getAuditLogs(PagerDto pager) {
+        //TODO uncomment below
+        //AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.viewAuditLogs));
         Pageable pageRequest;
         if (!ObjectUtils.isEmpty(pager.getSortBy())) {
             pageRequest = PageRequest.of(pager.getPage(), pager.getPageSize(), pager.getSortOrder(), pager.getSortBy());
@@ -40,7 +43,16 @@ public class AuditLogServiceImpl implements AuditLogService {
     }
 
     @Override
+    public List<AuditLog> getAuditLogs() {
+        //TODO uncomment below
+        //AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.viewAuditLogs));
+        return auditRepository.findAll();
+    }
+
+    @Override
     public Page<AuditLog> getAuditLogsByApp(long appId, PagerDto pager) {
+        //TODO uncomment below
+        //AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.viewAuditLogs));
         Pageable pageRequest;
         if (!ObjectUtils.isEmpty(pager.getSortBy())) {
             pageRequest = PageRequest.of(pager.getPage(), pager.getPageSize(), pager.getSortOrder(), pager.getSortBy());
@@ -52,6 +64,8 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     @Override
     public Page<AuditLog> getAuditLogsByUser(long userId, PagerDto pager) {
+        //TODO uncomment below
+        //AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.viewAuditLogs));
         Pageable pageRequest;
         if (!ObjectUtils.isEmpty(pager.getSortBy())) {
             pageRequest = PageRequest.of(pager.getPage(), pager.getPageSize(), pager.getSortOrder(), pager.getSortBy());

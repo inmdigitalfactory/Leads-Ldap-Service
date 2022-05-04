@@ -385,7 +385,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public SAMLDefaultLogger samlLogger() {
         SAMLDefaultLogger samlDefaultLogger = new SAMLDefaultLogger();
-        samlDefaultLogger.setLogMessages(true);
+        samlDefaultLogger.setLogAllMessages(true);
+        samlDefaultLogger.setLogErrors(true);
+        samlDefaultLogger.setLogMessagesOnException(true);
         return samlDefaultLogger;
     }
 
