@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("audit-logs")
 public class AuditLogController {
@@ -22,6 +24,11 @@ public class AuditLogController {
     @GetMapping("")
     public ResponseEntity<Page<AuditLog>> getAuditLogs(PagerDto pagerDto) {
         return ResponseEntity.ok().body(auditLogService.getAuditLogs(pagerDto));
+    }
+
+    @GetMapping("all")
+    public ResponseEntity<List<AuditLog>> getAllAuditLogs() {
+        return ResponseEntity.ok().body(auditLogService.getAuditLogs());
     }
 
     @GetMapping("/apps/{appId}")

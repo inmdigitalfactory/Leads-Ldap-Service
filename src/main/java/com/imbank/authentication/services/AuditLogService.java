@@ -7,11 +7,13 @@ import com.imbank.authentication.entities.User;
 import com.imbank.authentication.enums.AuditAction;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
 import java.util.Map;
 
 public interface AuditLogService {
 
     Page<AuditLog> getAuditLogs(PagerDto pager);
+    List<AuditLog> getAuditLogs();
     Page<AuditLog> getAuditLogsByApp(long appId, PagerDto pager);
     Page<AuditLog> getAuditLogsByUser(long userId, PagerDto pager);
     AuditLog createAuditLog(AuditAction addUser, AllowedApp app, User user);

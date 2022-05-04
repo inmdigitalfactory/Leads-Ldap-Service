@@ -39,7 +39,7 @@ public class AppServiceImpl implements AppService {
         allowedApp.setEnabled(allowedAppDto.getEnabled());
         allowedApp = allowedAppRepository.save(allowedApp);
 
-        auditLogService.createAuditLog(AuditAction.addUser, allowedApp, null);
+        auditLogService.createAuditLog(AuditAction.createApp, allowedApp, null);
         return allowedApp;
 
     }
