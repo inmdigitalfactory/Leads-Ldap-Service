@@ -46,7 +46,7 @@ public class AuditLogServiceImpl implements AuditLogService {
     public List<AuditLog> getAuditLogs() {
         //TODO uncomment below
         //AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.viewAuditLogs));
-        return auditRepository.findAll();
+        return auditRepository.findAllByOrderByIdDesc();
     }
 
     @Override
