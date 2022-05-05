@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 
@@ -162,6 +163,20 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.save(user);
     }
+    @Override
+    public User updateUserStatus(Long userId, Long appId) {
+        User user = userRepository.findById(userId).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "Unknown user"));
+        AuthUtils.ensurePermitted(user.getSystemAccesses(), List.of(AppPermission.updateUser));
+
+        AllowedApp app = allowedAppRepository.findById(appId).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "Unknown application"));
+        SystemAccess existingAccess = systemAccessRepository.findFirstByUserAndApp(user, app).orElseThrow();
+        existingAccess.setEnabled(!ObjectUtils.isEmpty(existingAccess.getEnabled()) && !existingAccess.getEnabled());
+        //assign this app and role to the user
+        user.getSystemAccesses().add(systemAccessRepository.save(existingAccess));
+        user.setModifiedOn(new Date());
+        auditLogService.createAuditLog(AuditAction.updateUser, null, user, Map.of("newStatus", existingAccess.getEnabled()));
+        return userRepository.save(user);
+    }
 
     @Override
     public User addSystemAccess(Long userId, SystemAccessDto systemAccessDto) {
@@ -184,6 +199,7 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.save(user);
     }
+
 
     @Override
     public LdapUserDTO searchUser(String username) {

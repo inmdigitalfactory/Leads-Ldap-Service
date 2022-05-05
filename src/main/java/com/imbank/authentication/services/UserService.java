@@ -23,4 +23,6 @@ public interface UserService {
 
 
     User addSystemAccess(Long userId, SystemAccessDto systemAccessDto);
+
+    User updateUserStatus(Long userId, Long appId);
 }
