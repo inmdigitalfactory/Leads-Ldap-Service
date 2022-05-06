@@ -23,6 +23,8 @@ public class SystemAccess extends EntityAuditor {
     @OneToOne
     @JoinColumn(name = "app_id")
     private AllowedApp app;
+    @Builder.Default
+    private Boolean enabled = true;
     @OneToOne
     @JsonBackReference
     @JoinColumn(name = "user_id")

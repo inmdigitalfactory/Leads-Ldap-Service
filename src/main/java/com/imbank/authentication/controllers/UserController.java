@@ -36,6 +36,11 @@ public class UserController {
         return ResponseEntity.ok().body(userService.updateUserRoles(userId, appId, roleDto));
     }
 
+    @PutMapping("{userId}/system-accesses/{appId}/status")
+    public ResponseEntity<User> toggleStatus(@PathVariable Long userId, @PathVariable Long appId) {
+        return ResponseEntity.ok().body(userService.updateUserStatus(userId, appId));
+    }
+
     @PostMapping("{userId}/system-accesses")
     public ResponseEntity<User> addSystemAccess(@PathVariable Long userId, @RequestBody @Valid SystemAccessDto systemAccessDto) {
         return ResponseEntity.ok().body(userService.addSystemAccess(userId, systemAccessDto));
