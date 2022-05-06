@@ -36,6 +36,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml.*;
 import org.springframework.security.saml.context.SAMLContextProviderImpl;
 import org.springframework.security.saml.key.JKSKeyManager;
@@ -53,14 +54,17 @@ import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
-import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.util.ObjectUtils;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -87,6 +91,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private String entityId;
     @Value("${authentication-service.entity-base-url}")
     private String entityBaseUrl;
+    @Value("${authentication-service.saml-success-url}")
+    private String samlSuccessRedirectUrl;
+    @Value("${authentication-service.saml-failure-url}")
+    private String samlFailureRedirectUrl;
 
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
@@ -288,9 +296,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      * @return SavedRequestAwareAuthenticationSuccessHandler
      */
     @Bean
-    public SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler() {
-        SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler = new SavedRequestAwareAuthenticationSuccessHandler();
-        successRedirectHandler.setDefaultTargetUrl("/");
+    public AuthenticationSuccessHandler successRedirectHandler() {
+//        SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler = new SavedRequestAwareAuthenticationSuccessHandler();
+        SimpleUrlAuthenticationSuccessHandler successRedirectHandler = new SimpleUrlAuthenticationSuccessHandler() {
+            @Override
+            public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+                super.onAuthenticationSuccess(request, response, authentication);
+                log.info("User is authenticated (Callback). Principal: {}\nAuthorities: {}\nName: {}\nDetails: {}",
+                        authentication.getPrincipal(), authentication.getAuthorities(), authentication.getName(),
+                        authentication.getDetails());
+            }
+        };
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(!ObjectUtils.isEmpty(authentication)) {
+            log.info("User is authenticated. Principal: {}\nAuthorities: {}\nName: {}\nDetails: {}",
+                    authentication.getPrincipal(), authentication.getAuthorities(), authentication.getName(),
+                    authentication.getDetails());
+        };
+        successRedirectHandler.setDefaultTargetUrl(samlSuccessRedirectUrl);
         return successRedirectHandler;
     }
 
@@ -303,7 +326,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public SimpleUrlAuthenticationFailureHandler failureRedirectHandler() {
         SimpleUrlAuthenticationFailureHandler simpleUrlAuthenticationFailureHandler = new SimpleUrlAuthenticationFailureHandler();
         simpleUrlAuthenticationFailureHandler.setUseForward(true);
-        simpleUrlAuthenticationFailureHandler.setDefaultFailureUrl("/error.html");
+        simpleUrlAuthenticationFailureHandler.setDefaultFailureUrl(samlFailureRedirectUrl);
         return simpleUrlAuthenticationFailureHandler;
     }
 
