@@ -2,6 +2,7 @@ package com.imbank.authentication.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.imbank.authentication.enums.AuthModule;
+import com.imbank.authentication.utils.Constants;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -47,6 +48,12 @@ public class AllowedApp extends EntityAuditor {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         AllowedApp that = (AllowedApp) o;
         return id != null && Objects.equals(id, that.id);
+    }
+
+
+    @Transient
+    public boolean isLdapService() {
+        return Constants.APP_NAME.equals(name);
     }
 
 }

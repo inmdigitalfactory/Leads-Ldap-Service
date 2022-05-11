@@ -159,7 +159,7 @@ public class UserServiceImpl implements UserService {
         user.getSystemAccesses().add(systemAccessRepository.save(systemAccess));
         user.setModifiedOn(new Date());
 
-        auditLogService.createAuditLog(AuditAction.addUser, null, user, Map.of("oldRole", oldRole, "newRole", role.getName()));
+        auditLogService.createAuditLog(AuditAction.updateUser, null, user, Map.of("oldRole", oldRole, "newRole", role.getName()));
 
         return userRepository.save(user);
     }
