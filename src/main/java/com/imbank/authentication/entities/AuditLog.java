@@ -31,6 +31,7 @@ public class AuditLog extends EntityAuditor {
     private long appId;
     private long userId;
     private String metadata;
+    private String role;
 
 
     @Override

@@ -5,14 +5,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.imbank.authentication.dtos.PagerDto;
 import com.imbank.authentication.entities.AllowedApp;
 import com.imbank.authentication.entities.AuditLog;
+import com.imbank.authentication.entities.SystemAccess;
 import com.imbank.authentication.entities.User;
 import com.imbank.authentication.enums.AuditAction;
+import com.imbank.authentication.exceptions.AuthenticationExceptionImpl;
 import com.imbank.authentication.repositories.AuditRepository;
+import com.imbank.authentication.repositories.UserRepository;
 import com.imbank.authentication.services.AuditLogService;
+import com.imbank.authentication.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -27,6 +32,9 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     @Autowired
     private AuditRepository auditRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public Page<AuditLog> getAuditLogs(PagerDto pager) {
@@ -97,6 +105,10 @@ public class AuditLogServiceImpl implements AuditLogService {
                 e.printStackTrace();
             }
         }
+        String username = AuthUtils.getLoggedInUser().orElseThrow(() -> new RuntimeException("You must be logged in to perform this action"));
+        User auditingUser = userRepository.findFirstByUsernameIgnoreCase(username).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.FORBIDDEN, "You must be logged in to perform thsi action"));
+        SystemAccess systemAccess = auditingUser.getSystemAccesses().stream().filter(sa -> sa.getApp().isLdapService()).findFirst().orElseThrow();
+        auditLogBuilder = auditLogBuilder.role(systemAccess.getRole().getName());
         AuditLog auditLog = auditLogBuilder.build();
         return auditRepository.save(auditLog);
     }
