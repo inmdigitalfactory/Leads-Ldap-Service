@@ -7,6 +7,8 @@ import com.imbank.authentication.entities.User;
 import com.imbank.authentication.enums.AuditAction;
 import org.springframework.data.domain.Page;
 
+import java.io.ByteArrayInputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -19,4 +21,6 @@ public interface AuditLogService {
     AuditLog createAuditLog(AuditAction addUser, AllowedApp app, User user);
 
     AuditLog createAuditLog(AuditAction addUser, AllowedApp o, User user, Map<String, Object> metadata);
+
+    ByteArrayInputStream downloadLogs(Date startDate, Date endDate);
 }
