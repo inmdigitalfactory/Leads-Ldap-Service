@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 public class PagerDto {
     private int page = 0;
     private int pageSize = Constants.PAGE_SIZE;
-    private Sort.Direction sortOrder = Sort.Direction.ASC;
+    private Sort.Direction sortOrder = Sort.Direction.DESC;
     private String sortBy = "id";
+    private String action;
 }
