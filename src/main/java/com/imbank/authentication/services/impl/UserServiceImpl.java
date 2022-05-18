@@ -159,7 +159,7 @@ public class UserServiceImpl implements UserService {
         user.getSystemAccesses().add(systemAccessRepository.save(systemAccess));
         user.setModifiedOn(new Date());
 
-        auditLogService.createAuditLog(AuditAction.updateUser, null, user, Map.of("oldRole", oldRole, "newRole", role.getName()));
+        auditLogService.createAuditLog(AuditAction.updateUser, systemAccess.getApp(), user, Map.of("oldRole", oldRole, "newRole", role.getName()));
 
         return userRepository.save(user);
     }
@@ -174,7 +174,7 @@ public class UserServiceImpl implements UserService {
         //assign this app and role to the user
         user.getSystemAccesses().add(systemAccessRepository.save(existingAccess));
         user.setModifiedOn(new Date());
-        auditLogService.createAuditLog(AuditAction.updateUser, null, user, Map.of("newStatus", existingAccess.getEnabled()));
+        auditLogService.createAuditLog(AuditAction.updateUser, existingAccess.getApp(), user, Map.of("newStatus", existingAccess.getEnabled()));
         return userRepository.save(user);
     }
 
@@ -195,7 +195,7 @@ public class UserServiceImpl implements UserService {
         //assign this app and role to the user
         user.getSystemAccesses().add(systemAccessRepository.save(access));
         user.setModifiedOn(new Date());
-        auditLogService.createAuditLog(AuditAction.addSystemAccess, null, user);
+        auditLogService.createAuditLog(AuditAction.addSystemAccess, access.getApp(), user);
 
         return userRepository.save(user);
     }
