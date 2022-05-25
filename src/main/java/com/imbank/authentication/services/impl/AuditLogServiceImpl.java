@@ -14,7 +14,6 @@ import com.imbank.authentication.repositories.UserRepository;
 import com.imbank.authentication.services.AuditLogService;
 import com.imbank.authentication.utils.AuthUtils;
 import com.imbank.authentication.utils.Utils;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,23 +159,23 @@ public class AuditLogServiceImpl implements AuditLogService {
             CellStyle createStyle = workbook.createCellStyle();
             Font createFont = workbook.createFont();
             createFont.setBold(true);
-            createStyle.setFillBackgroundColor(HSSFColor.HSSFColorPredefined.GREEN.getIndex());
-            createStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            createFont.setColor(IndexedColors.GREEN.getIndex());
+//            createStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             createStyle.setFont(font);
 
             CellStyle updateStyle = workbook.createCellStyle();
             Font updateFont = workbook.createFont();
             updateFont.setBold(true);
-            updateStyle.setFillBackgroundColor(HSSFColor.HSSFColorPredefined.ORANGE.getIndex());
-            updateStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            updateStyle.setFont(font);
+            updateFont.setColor(IndexedColors.ORANGE.getIndex());
+//            updateStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            updateStyle.setFont(updateFont);
 
             CellStyle deleteStyle = workbook.createCellStyle();
             Font deleteFont = workbook.createFont();
             deleteFont.setBold(true);
-            deleteStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.DARK_RED.getIndex());
-            deleteStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            deleteStyle.setFont(font);
+            deleteFont.setColor(IndexedColors.RED.getIndex());
+//            deleteStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            deleteStyle.setFont(deleteFont);
 
             Map<String, User> users = userRepository.findAll().stream().collect(Collectors.toMap(User::getUsername, Function.identity()));
             AtomicInteger rowIdx = new AtomicInteger(1);
