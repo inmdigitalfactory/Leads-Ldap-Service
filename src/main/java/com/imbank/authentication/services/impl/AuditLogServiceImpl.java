@@ -177,7 +177,7 @@ public class AuditLogServiceImpl implements AuditLogService {
 //            deleteStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             deleteStyle.setFont(deleteFont);
 
-            Map<String, User> users = userRepository.findAll().stream().collect(Collectors.toMap(User::getUsername, Function.identity()));
+            Map<String, User> users = userRepository.findAll().stream().collect(Collectors.toMap(User::getUsername, Function.identity(), (a,b)-> a));
             AtomicInteger rowIdx = new AtomicInteger(1);
             AtomicInteger counter = new AtomicInteger(1);
             auditRepository.findAllByCreatedOnBetween(startDate, endDate)
