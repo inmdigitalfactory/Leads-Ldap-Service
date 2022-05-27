@@ -29,6 +29,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -180,7 +184,8 @@ public class AuditLogServiceImpl implements AuditLogService {
             Map<String, User> users = userRepository.findAll().stream().collect(Collectors.toMap(User::getUsername, Function.identity(), (a,b)-> a));
             AtomicInteger rowIdx = new AtomicInteger(1);
             AtomicInteger counter = new AtomicInteger(1);
-            auditRepository.findAllByCreatedOnBetween(startDate, endDate)
+            LocalDateTime endOfDay = LocalDateTime.ofInstant(endDate.toInstant(), ZoneId.systemDefault()).with(LocalTime.MAX);
+            auditRepository.findAllByCreatedOnBetween(startDate, Date.from(endOfDay.toInstant(ZoneOffset.UTC)))
                     .forEach(auditLog -> {
                         Row row = sheet.createRow(rowIdx.getAndIncrement());
                         row.createCell(0).setCellValue(counter.getAndIncrement());
@@ -202,7 +207,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                         }
                         cell.setCellValue(crudAction);
 
-                        row.createCell(4).setCellValue(Utils.mapCrudDescription(auditLog));
+                        row.createCell(4).setCellValue(Utils.mapCrudDescription(auditLog, objectMapper));
                         row.createCell(5).setCellValue(dateFormatter.format(auditLog.getCreatedOn()));
                     });
             workbook.write(out);
