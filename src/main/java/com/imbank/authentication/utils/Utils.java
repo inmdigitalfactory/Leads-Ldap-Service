@@ -1,5 +1,8 @@
 package com.imbank.authentication.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.imbank.authentication.entities.AuditLog;
 import com.imbank.authentication.enums.AuditAction;
 import lombok.extern.slf4j.Slf4j;
@@ -7,12 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.imbank.authentication.enums.AuditAction.*;
 
 @Slf4j
 public class Utils {
-
 
     public static List<AuditAction> getActions(String action) {
         List<AuditAction> actions ;
@@ -49,10 +52,21 @@ public class Utils {
         return action.name();
     }
 
-    public static String mapCrudDescription(AuditLog auditLog) {
+    public static String mapCrudDescription(AuditLog auditLog, ObjectMapper objectMapper) {
         switch (auditLog.getAction()) {
             case updateUser:
-                return String.format("Updated user %s information", auditLog.getUserName());
+                try {
+                    Map<String, String> metadata = objectMapper.readValue(auditLog.getMetadata(), new TypeReference<>() {});
+                    String info = "";
+                    if(metadata.get("oldRole") != null) {
+                        info = String.format("role from %s to %s for %s", metadata.get("oldRole"), metadata.get("newRole"), auditLog.getAppName());
+                    }
+                    else if(metadata.get("newStatus") != null) {
+                        info = String.format("status to %s for %s", Boolean.parseBoolean(metadata.get("newStatus")) ? "Active" : "Inactive", auditLog.getAppName());
+                    }
+                    return String.format("Updated user %s %s", auditLog.getUserName(), info);
+                } catch (JsonProcessingException ignored) {}
+                return String.format("Updated user %s information", auditLog.getUserName() );
             case addSystemAccess:
                 return String.format("Added access for %s to %s", auditLog.getAppName(), auditLog.getUserName());
             case deleteUser:
