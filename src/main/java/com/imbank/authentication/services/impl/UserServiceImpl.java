@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getUsers() {
-        log.info("Getting all users");
+//        log.info("Getting all users");
         AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.getAllUsers));
         return userRepository.findAll();
     }
