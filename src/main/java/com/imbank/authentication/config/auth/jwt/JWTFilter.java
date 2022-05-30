@@ -1,5 +1,6 @@
 package com.imbank.authentication.config.auth.jwt;
 
+import com.imbank.authentication.utils.Constants;
 import com.imbank.authentication.utils.JwtUtils;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Locale;
@@ -38,8 +40,10 @@ public class JWTFilter extends GenericFilterBean {
         Authentication authentication = getAuthentication(jwt);
         if (!ObjectUtils.isEmpty(authentication)) {
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.info("User authentication successful");
         }
         else {
+            log.info("Authentication failed");
             throw new AuthenticationCredentialsNotFoundException("No authentication provided");
         }
         filterChain.doFilter(servletRequest, servletResponse);
@@ -49,6 +53,15 @@ public class JWTFilter extends GenericFilterBean {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.toLowerCase(Locale.ROOT).startsWith("bearer ")) {
             return bearerToken.substring(7);
+        }
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null) {
+            for(Cookie cookie:cookies) {
+                log.info("Processing cookie {}", cookie.getName());
+                if(Constants.TOKEN_COOKIE_NAME.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
         return null;
     }

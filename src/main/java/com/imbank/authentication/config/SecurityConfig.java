@@ -1,5 +1,6 @@
 package com.imbank.authentication.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.imbank.authentication.config.auth.AllowedAppsAuthenticationFilter;
 import com.imbank.authentication.config.auth.jwt.JWTConfigurer;
@@ -7,10 +8,14 @@ import com.imbank.authentication.dtos.ApiResponse;
 import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.dtos.LoginSuccessDTO;
 import com.imbank.authentication.entities.AllowedApp;
+import com.imbank.authentication.entities.User;
+import com.imbank.authentication.repositories.AllowedAppRepository;
+import com.imbank.authentication.repositories.UserRepository;
 import com.imbank.authentication.services.AllowedAppService;
 import com.imbank.authentication.services.LdapService;
 import com.imbank.authentication.utils.AuthUtils;
 import com.imbank.authentication.utils.Constants;
+import com.imbank.authentication.utils.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -55,20 +60,21 @@ import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.util.ObjectUtils;
 
-import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @EnableWebSecurity
@@ -82,6 +88,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private LdapService ldapService;
 
+    @Value("${spring.ldap.base}")
+    private String ldapBase;
+
     @Value("${security.endpoints.allow}")
     private String[] safeEndpoints;
 
@@ -89,6 +98,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private String idpMetadataUrl;
     @Value("${authentication-service.entity-id}")
     private String entityId;
+
+    @Value("${authentication-service.domain}")
+    private String apiDomain;
+
     @Value("${authentication-service.entity-base-url}")
     private String entityBaseUrl;
     @Value("${authentication-service.saml-success-url}")
@@ -96,11 +109,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${authentication-service.saml-failure-url}")
     private String samlFailureRedirectUrl;
 
+    @Autowired
+    private AllowedAppRepository allowedAppRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();
     }
-
 
     @Bean
     public static SAMLBootstrap samlBootstrap() {
@@ -297,24 +317,54 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Bean
     public AuthenticationSuccessHandler successRedirectHandler() {
-//        SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler = new SavedRequestAwareAuthenticationSuccessHandler();
-        SimpleUrlAuthenticationSuccessHandler successRedirectHandler = new SimpleUrlAuthenticationSuccessHandler() {
-            @Override
-            public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                super.onAuthenticationSuccess(request, response, authentication);
-                log.info("User is authenticated (Callback). Principal: {}\nAuthorities: {}\nName: {}\nDetails: {}",
-                        authentication.getPrincipal(), authentication.getAuthorities(), authentication.getName(),
-                        authentication.getDetails());
-            }
-        };
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(!ObjectUtils.isEmpty(authentication)) {
-            log.info("User is authenticated. Principal: {}\nAuthorities: {}\nName: {}\nDetails: {}",
-                    authentication.getPrincipal(), authentication.getAuthorities(), authentication.getName(),
-                    authentication.getDetails());
-        };
+        SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler = new SavedRequestAwareAuthenticationSuccessHandler();
+        successRedirectHandler.setRedirectStrategy((request, response, url) -> {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            handleSuccessfulLogin(response, auth);
+            response.sendRedirect(samlSuccessRedirectUrl);
+        });
         successRedirectHandler.setDefaultTargetUrl(samlSuccessRedirectUrl);
         return successRedirectHandler;
+    }
+
+    private void handleSuccessfulLogin(HttpServletResponse response, Authentication authentication) {
+        SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
+        String username  = credential.getNameID().getValue();
+        Optional<User> user = userRepository.findFirstByUsernameIgnoreCaseAndEnabled(username, true);
+        Optional<AllowedApp> thisApp = allowedAppRepository.findFirstByName(Constants.APP_NAME);
+        log.info("===================================== User's name: {}\nRemote Entity ID: {}\nAdditionalData: {}\nAttributes: {}", username, credential.getRemoteEntityID(), credential.getAdditionalData(), credential.getAttributes());
+        if(user.isPresent() && thisApp.isPresent()) {
+            LdapUserDTO ldapUserDTO = LdapUserDTO.builder().user(user.get()).username(username).build();
+            String token = JwtUtils.createToken(ldapUserDTO, thisApp.get(), null, false );
+            Cookie tokenCookie = new Cookie(Constants.TOKEN_COOKIE_NAME, token);
+//                            tokenCookie.setHttpOnly(false);
+                    tokenCookie.setPath("/");
+                            tokenCookie.setDomain(apiDomain);
+                    tokenCookie.setMaxAge((int) thisApp.get().getTokenValiditySeconds());
+            String refreshToken = JwtUtils.createToken(ldapUserDTO, thisApp.get(), null, true );
+            Cookie refreshTokenCookie = new Cookie(Constants.REFRESH_TOKEN_COOKIE_NAME, refreshToken);
+//                    refreshTokenCookie.setHttpOnly(false);
+            refreshTokenCookie.setPath("/");
+                    refreshTokenCookie.setDomain(apiDomain);
+            refreshTokenCookie.setMaxAge((int) thisApp.get().getRefreshTokenValiditySeconds());
+            response.addCookie(tokenCookie);
+            response.addCookie(refreshTokenCookie);
+            log.info("Login successful");
+        }
+        else {
+            Map<String, Object> data = Map.of(
+                    "message", String.format("User '%s' is not allowed to access this system. Talk to IT Support to get access", username)
+            );
+            try {
+                String value = objectMapper.writeValueAsString(data);
+                value = URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
+                Cookie loginError = new Cookie("error", value);
+                loginError.setPath("/");
+                loginError.setDomain(apiDomain);
+                loginError.setMaxAge(5);
+                response.addCookie(loginError);
+            } catch (JsonProcessingException ignored) {}
+        }
     }
 
     /**
@@ -536,7 +586,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //        HTTPMetadataProvider httpMetadataProvider = new HTTPMetadataProvider(backgroundTimer(), httpClient(), idpMetadataUrl);
 //        httpMetadataProvider.setParserPool(parserPool());
 //        ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(httpMetadataProvider, extendedMetadata());
-        FilesystemMetadataProvider metadataProvider = new FilesystemMetadataProvider(new File("idp-metadata.xml"));
+        FilesystemMetadataProvider metadataProvider = new FilesystemMetadataProvider(new File("saml/idp-metadata.xml"));
         metadataProvider.setParserPool(parserPool());
         ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(metadataProvider, extendedMetadata());
         extendedMetadataDelegate.setMetadataTrustCheck(true);
