@@ -1,6 +1,5 @@
 package com.imbank.authentication.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.imbank.authentication.enums.AuthModule;
 import com.imbank.authentication.utils.Constants;
 import lombok.*;
@@ -32,7 +31,6 @@ public class AllowedApp extends EntityAuditor {
     private String name;
     @Column(name = "access_token")
     @ToString.Exclude
-    @JsonIgnore
     private String accessToken;
     private boolean enabled;
     private long tokenValiditySeconds;

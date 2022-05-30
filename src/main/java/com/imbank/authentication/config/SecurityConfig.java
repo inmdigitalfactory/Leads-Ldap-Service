@@ -586,7 +586,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //        HTTPMetadataProvider httpMetadataProvider = new HTTPMetadataProvider(backgroundTimer(), httpClient(), idpMetadataUrl);
 //        httpMetadataProvider.setParserPool(parserPool());
 //        ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(httpMetadataProvider, extendedMetadata());
-        FilesystemMetadataProvider metadataProvider = new FilesystemMetadataProvider(new File("saml/idp-metadata.xml"));
+        FilesystemMetadataProvider metadataProvider = new FilesystemMetadataProvider(new File("idp-metadata.xml"));
         metadataProvider.setParserPool(parserPool());
         ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(metadataProvider, extendedMetadata());
         extendedMetadataDelegate.setMetadataTrustCheck(true);
