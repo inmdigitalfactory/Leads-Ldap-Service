@@ -1,11 +1,11 @@
 package com.imbank.authentication.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.imbank.authentication.entities.AuditLog;
 import com.imbank.authentication.enums.AuditAction;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.ObjectUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,16 +56,18 @@ public class Utils {
         switch (auditLog.getAction()) {
             case updateUser:
                 try {
-                    Map<String, String> metadata = objectMapper.readValue(auditLog.getMetadata(), new TypeReference<>() {});
-                    String info = "";
-                    if(metadata.get("oldRole") != null) {
-                        info = String.format("role from %s to %s for %s", metadata.get("oldRole"), metadata.get("newRole"), auditLog.getAppName());
+                    if(!ObjectUtils.isEmpty(auditLog.getMetadata())) {
+                        Map<String, String> metadata = objectMapper.readValue(auditLog.getMetadata(), new TypeReference<>() {});
+                        String info = "";
+                        if(metadata.get("oldRole") != null) {
+                            info = String.format("role from %s to %s for %s", metadata.get("oldRole"), metadata.get("newRole"), auditLog.getAppName());
+                        }
+                        else if(metadata.get("newStatus") != null) {
+                            info = String.format("status to %s for %s", Boolean.parseBoolean(metadata.get("newStatus")) ? "Active" : "Inactive", auditLog.getAppName());
+                        }
+                        return String.format("Updated user %s %s", auditLog.getUserName(), info);
                     }
-                    else if(metadata.get("newStatus") != null) {
-                        info = String.format("status to %s for %s", Boolean.parseBoolean(metadata.get("newStatus")) ? "Active" : "Inactive", auditLog.getAppName());
-                    }
-                    return String.format("Updated user %s %s", auditLog.getUserName(), info);
-                } catch (JsonProcessingException ignored) {}
+                } catch (Exception ignored) {}
                 return String.format("Updated user %s information", auditLog.getUserName() );
             case addSystemAccess:
                 return String.format("Added access for %s to %s", auditLog.getAppName(), auditLog.getUserName());
