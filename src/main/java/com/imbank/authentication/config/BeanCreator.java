@@ -1,6 +1,5 @@
 package com.imbank.authentication.config;
 
-import com.imbank.authentication.utils.FileUtils;
 import com.imbank.authentication.utils.RequestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,17 +8,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.DefaultDirObjectFactory;
 import org.springframework.ldap.core.support.LdapContextSource;
-import org.springframework.security.saml2.core.Saml2X509Credential;
-import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
-import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
-import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.security.KeyStore;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 
 @Component
 @Slf4j
@@ -64,24 +55,5 @@ public class BeanCreator {
         return ldapTemplate;
     }
 
-
-    @Bean
-    public RelyingPartyRegistrationRepository relyingPartyRegistrations() throws Exception {
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        byte[] cpr = FileUtils.readFileBytes("saml.crt");
-        InputStream in = new ByteArrayInputStream(cpr);
-        log.info("Cert length is {}", cpr.length);
-        X509Certificate certificate = (X509Certificate)certFactory.generateCertificate(in);
-        Saml2X509Credential credential = Saml2X509Credential.verification(certificate);
-        RelyingPartyRegistration registration = RelyingPartyRegistration
-                .withRegistrationId("okta-saml")
-                .assertingPartyDetails(party -> party
-                        .entityId("http://www.okta.com/exksqq6qjKMFpEAfz696")
-                        .singleSignOnServiceLocation("https://trial-5696973.okta.com/app/trial-5696973_imbankldapservice_1/exksqq6qjKMFpEAfz696/sso/saml")
-                        .wantAuthnRequestsSigned(false)
-                        .verificationX509Credentials(c -> c.add(credential))
-                ).build();
-        return new InMemoryRelyingPartyRegistrationRepository(registration);
-    }
 
 }

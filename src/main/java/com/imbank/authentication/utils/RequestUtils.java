@@ -1,7 +1,6 @@
 package com.imbank.authentication.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -15,6 +14,8 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 @Slf4j
 public class RequestUtils {
@@ -61,19 +62,16 @@ public class RequestUtils {
                 Certificate certificate = cf.generateCertificate(cert);
                 ks.setCertificateEntry("imbank", certificate);
             }
-//            try (InputStream cert = new ClassPathResource("saml.crt").getInputStream()) {
-//                File verificationKey = new ClassPathResource("saml.crt").getFile();
-//                X509Certificate certificate = X509Support.decodeCertificate(verificationKey);
-//                ks.setCertificateEntry(Constants.KEYSTORE_KEY, certificate);
-//            }
             try {
-                KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-                keyPairGenerator.initialize(2048);
-                KeyPair keyPair  = keyPairGenerator.generateKeyPair();
+                ClassPathResource classPathResource = new ClassPathResource("saml/saml.crt");
 
-                Certificate c = CertUtils.selfSign(keyPair, "dc=example.com");
+                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(FileUtils.readFileBytes("saml/saml.private.key"));
+                PrivateKey privateKey  = keyFactory.generatePrivate(keySpec);
+
+                X509Certificate c = (X509Certificate) cf.generateCertificate(classPathResource.getInputStream());
                 ks.setCertificateEntry(Constants.KEYSTORE_KEY, c);
-                ks.setKeyEntry(Constants.KEYSTORE_KEY, keyPair.getPrivate(), Constants.KEYSTORE_PASSWORD.toCharArray(), new Certificate[]{c});
+                ks.setKeyEntry(Constants.KEYSTORE_KEY, privateKey, Constants.KEYSTORE_PASSWORD.toCharArray(), new Certificate[]{c});
             }
             catch (Exception e){
                 e.printStackTrace();

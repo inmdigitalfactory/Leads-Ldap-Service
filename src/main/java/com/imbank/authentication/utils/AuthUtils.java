@@ -46,6 +46,7 @@ public class AuthUtils {
 
     private static boolean hasAnyPermission(List<String> permissions) {
         Claims claims = (Claims) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        log.info("Checking if {} has any of the permissions in {}", claims, permissions);
         if(ObjectUtils.isEmpty(claims)) {
             return false;
         }

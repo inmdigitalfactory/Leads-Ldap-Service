@@ -18,4 +18,6 @@ public class Constants {
     public static final String KEYSTORE_PASSWORD = "imbank";
     public static final String KEYSTORE_FILE_NAME = "ldapserver.jks";
     public static final int PAGE_SIZE = 15;
+    public static final String TOKEN_COOKIE_NAME = "token";
+    public static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
 }
