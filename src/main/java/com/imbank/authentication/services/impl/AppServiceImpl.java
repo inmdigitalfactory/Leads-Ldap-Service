@@ -27,7 +27,7 @@ public class AppServiceImpl implements AppService {
     @Override
     public AllowedApp createApp(AllowedAppDto allowedAppDto) {
         AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.createApp));
-        if(allowedAppRepository.findFirstByName(allowedAppDto.getName()).isPresent()) {
+        if(allowedAppRepository.findFirstByNameIgnoreCase(allowedAppDto.getName()).isPresent()) {
             throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST,"App already exists");
         }
         AllowedApp allowedApp = new AllowedApp();
