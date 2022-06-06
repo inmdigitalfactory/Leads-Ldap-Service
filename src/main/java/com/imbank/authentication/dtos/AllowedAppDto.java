@@ -14,6 +14,6 @@ public class AllowedAppDto {
     private long tokenValiditySeconds = 1800;
 //    @Min(1)
     private long refreshTokenValiditySeconds = 7200;
-    @NotNull
-    private Boolean enabled;
+//    @NotNull
+    private Boolean enabled = true;
 }
