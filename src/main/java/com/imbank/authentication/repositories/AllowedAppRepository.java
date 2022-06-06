@@ -12,4 +12,6 @@ public interface AllowedAppRepository extends JpaRepository<AllowedApp, Long> {
     AllowedApp findFirstByAccessTokenAndEnabled(String accessToken, boolean enabled);
 
     Optional<AllowedApp> findFirstByName(String name);
+
+    Optional<AllowedApp> findFirstByNameIgnoreCase(String name);
 }
