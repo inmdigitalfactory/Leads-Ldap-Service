@@ -68,6 +68,7 @@ public class JWTFilter extends GenericFilterBean {
 
     public Authentication getAuthentication(String token) {
         Claims claims = JwtUtils.validateToken(token);
+        log.info("Claims {}", claims);
         return new UsernamePasswordAuthenticationToken(claims, token, null);
     }
 }

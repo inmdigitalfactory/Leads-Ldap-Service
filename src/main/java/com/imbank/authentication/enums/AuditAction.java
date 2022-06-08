@@ -1,5 +1,5 @@
 package com.imbank.authentication.enums;
 
 public enum AuditAction {
-    updateUser, addSystemAccess, deleteUser, createApp, addUser
+    updateUser, addSystemAccess, deleteUser, createApp, deleteApp, addUser
 }

@@ -14,6 +14,7 @@ import com.imbank.authentication.repositories.UserRepository;
 import com.imbank.authentication.services.AuditLogService;
 import com.imbank.authentication.utils.AuthUtils;
 import com.imbank.authentication.utils.Utils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class AuditLogServiceImpl implements AuditLogService {
 
     SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy HH:mm");
@@ -136,6 +138,7 @@ public class AuditLogServiceImpl implements AuditLogService {
         String username = AuthUtils.getLoggedInUser().orElseThrow(() -> new RuntimeException("You must be logged in to perform this action"));
         User auditingUser = userRepository.findFirstByUsernameIgnoreCase(username).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.FORBIDDEN, "You must be logged in to perform thsi action"));
         SystemAccess systemAccess = auditingUser.getSystemAccesses().stream().filter(sa -> sa.getApp().isLdapService()).findFirst().orElseThrow();
+        log.info("Creating audit log {} by {}-{}. App: {}, User: {}, metadata: {}", action, username, systemAccess.getRole(), app, user, metadata);
         auditLogBuilder = auditLogBuilder.role(systemAccess.getRole().getName());
         AuditLog auditLog = auditLogBuilder.build();
         return auditRepository.save(auditLog);
