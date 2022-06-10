@@ -15,7 +15,9 @@ import com.imbank.authentication.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -80,6 +82,9 @@ public class AppServiceImpl implements AppService {
         }
         auditLogService.createAuditLog(AuditAction.updateApp, allowedApp, null, Map.of("enabled", allowedAppDto.getEnabled(), "tokenValiditySeconds", allowedAppDto.getTokenValiditySeconds(), "refreshTokenValiditySeconds", allowedAppDto.getRefreshTokenValiditySeconds(), "name", allowedAppDto.getName()));
 
+        if(!ObjectUtils.isEmpty(allowedApp.getModules())) {
+            allowedApp.setModules(new HashSet<>(allowedApp.getModules()));
+        }
         allowedApp.setEnabled(allowedAppDto.getEnabled());
         allowedApp.setName(allowedAppDto.getName());
         allowedApp.setTokenValiditySeconds(allowedAppDto.getTokenValiditySeconds());

@@ -32,6 +32,9 @@ public class LdapServiceImpl implements LdapService {
     @Value("${spring.ldap.baseKe}")
     private String ldapBaseDn;
 
+    @Value("${spring.ldap.base}")
+    private String baseDn;
+
     @Value("${spring.ldap.baseTz}")
     private String ldapBaseDnTzUsers;
 
@@ -54,7 +57,7 @@ public class LdapServiceImpl implements LdapService {
                     .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.UNAUTHORIZED, "You are not allowed to access this service"));
             user.getSystemAccesses().stream().filter(systemAccess1 -> systemAccess1.getApp().getId().equals(allowedApp.getId())).findFirst()
                     .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.UNAUTHORIZED, "You are not allowed to access this service"));
-            LdapUserDTO ldapUserDTO = getADDetails(credentials.getUsername(), credentials.getPassword(), user.getBaseDn());
+            LdapUserDTO ldapUserDTO = getADDetails(credentials.getUsername(), credentials.getPassword(), baseDn);
             if(!ObjectUtils.isEmpty(ldapUserDTO)) {
                 if(!allowedApp.getModules().contains(AuthModule.roleManagement)) {
                     user.setSystemAccesses(null);
@@ -93,13 +96,6 @@ public class LdapServiceImpl implements LdapService {
             filter.and(new EqualsFilter("objectClass", "top"));
             filter.and(new EqualsFilter("objectClass", "organizationalPerson"));
 
-            if(!ObjectUtils.isEmpty(password)) {//verify password as well
-                boolean validCredentials = ldapTemplate.authenticate(baseDn, filter.encode(), password);
-                if(!validCredentials) {
-                    throw new IllegalArgumentException("Invalid username or password");
-                }
-            }
-
             LdapUserDTO ldapUser = new LdapUserDTO();
             LdapUserDTO finalLdapUser = ldapUser;
             ContextMapper<Object> contextMapper = o -> {
@@ -114,6 +110,7 @@ public class LdapServiceImpl implements LdapService {
                 finalLdapUser.setPhone(getValue(a, "phone"));
                 finalLdapUser.setUsername(getValue(a, "sAMAccountName"));
                 finalLdapUser.setDescription(getValue(a, "description"));
+                finalLdapUser.setBaseDn(((DirContextAdapter) o).getDn() + "");
 
                 if(ObjectUtils.isEmpty(finalLdapUser.getUsername())) {
                     finalLdapUser.setUsername(adUsername);
@@ -130,6 +127,15 @@ public class LdapServiceImpl implements LdapService {
             catch (Exception e) {//Referrals might throw errors when using port 636. Consider using port 3269
                 log.info("Some error searching for data: {}", e.getLocalizedMessage());
             }
+
+            if(!ObjectUtils.isEmpty(password)) {//verify password as well
+                log.info("Attempting to authenticate: {}", ldapUser);
+                boolean validCredentials = !ObjectUtils.isEmpty(ldapUser) && !ObjectUtils.isEmpty(ldapUser.getBaseDn()) && ldapTemplate.authenticate(ldapUser.getBaseDn(), filter.encode(), password);
+                if(!validCredentials) {
+                    throw new IllegalArgumentException("Invalid username or password");
+                }
+            }
+
             return ldapUser;
         } catch (Exception e) {
             log.error("Could not authenticate", e);
