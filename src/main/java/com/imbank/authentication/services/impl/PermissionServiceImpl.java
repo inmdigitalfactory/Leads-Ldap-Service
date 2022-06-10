@@ -1,6 +1,7 @@
 package com.imbank.authentication.services.impl;
 
 import com.imbank.authentication.dtos.PermissionDto;
+import com.imbank.authentication.entities.AllowedApp;
 import com.imbank.authentication.entities.Permission;
 import com.imbank.authentication.enums.AppPermission;
 import com.imbank.authentication.exceptions.AuthenticationExceptionImpl;
@@ -33,9 +34,11 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public Permission addAppPermission(Long appId, PermissionDto permissionDto) {
         AuthUtils.ensurePermitted(appId, List.of(AppPermission.addPermission));
+        AllowedApp app = allowedAppRepository.findById(appId).orElseThrow();
         Permission permission = new Permission();
         permission.setCode(permissionDto.getCode());
         permission.setDescription(permissionDto.getDescription());
+        permission.setApp(app);
         return permissionRepository.save(permission);
     }
 
