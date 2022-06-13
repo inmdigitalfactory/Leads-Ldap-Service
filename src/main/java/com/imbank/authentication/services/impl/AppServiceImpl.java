@@ -80,7 +80,6 @@ public class AppServiceImpl implements AppService {
         if(!allowedAppDto.getName().equals(allowedApp.getName()) && allowedAppRepository.findFirstByNameIgnoreCase(allowedAppDto.getName()).isPresent()) {
             throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST,"App already exists");
         }
-        auditLogService.createAuditLog(AuditAction.updateApp, allowedApp, null, Map.of("enabled", allowedAppDto.getEnabled(), "tokenValiditySeconds", allowedAppDto.getTokenValiditySeconds(), "refreshTokenValiditySeconds", allowedAppDto.getRefreshTokenValiditySeconds(), "name", allowedAppDto.getName()));
 
         if(!ObjectUtils.isEmpty(allowedApp.getModules())) {
             allowedApp.setModules(new HashSet<>(allowedApp.getModules()));
@@ -89,7 +88,9 @@ public class AppServiceImpl implements AppService {
         allowedApp.setName(allowedAppDto.getName());
         allowedApp.setTokenValiditySeconds(allowedAppDto.getTokenValiditySeconds());
         allowedApp.setRefreshTokenValiditySeconds(allowedAppDto.getRefreshTokenValiditySeconds());
-        return allowedAppRepository.save(allowedApp);
+        allowedApp = allowedAppRepository.save(allowedApp);
+        auditLogService.createAuditLog(AuditAction.updateApp, allowedApp, null, Map.of("enabled", allowedAppDto.getEnabled(), "tokenValiditySeconds", allowedAppDto.getTokenValiditySeconds(), "refreshTokenValiditySeconds", allowedAppDto.getRefreshTokenValiditySeconds(), "name", allowedAppDto.getName()));
+        return allowedApp;
     }
 
     @Override
