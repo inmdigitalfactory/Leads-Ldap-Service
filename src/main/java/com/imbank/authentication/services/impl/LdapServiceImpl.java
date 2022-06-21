@@ -54,9 +54,11 @@ public class LdapServiceImpl implements LdapService {
         if(allowedApp.getModules().contains(AuthModule.userManagement)) {
             //This app has enabled user management. This user must be added to authenticate
             User user = userRepository.findFirstByUsernameIgnoreCaseAndEnabled(credentials.getUsername(), true)
-                    .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.UNAUTHORIZED, "You are not allowed to access this service"));
-            user.getSystemAccesses().stream().filter(systemAccess1 -> systemAccess1.getApp().getId().equals(allowedApp.getId()) && Boolean.TRUE.equals(systemAccess1.getEnabled())).findFirst()
-                    .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.UNAUTHORIZED, "You are not allowed to access this service"));
+                    .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.UNAUTHORIZED, "You are not authorized to access this service"));
+            user.getSystemAccesses().stream()
+                    .filter(systemAccess1 -> systemAccess1.getApp().getId().equals(allowedApp.getId()) && Boolean.TRUE.equals(systemAccess1.getEnabled()))
+                    .findFirst()
+                    .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.FORBIDDEN, "You are forbidden from accessing this service"));
             LdapUserDTO ldapUserDTO = getADDetails(credentials.getUsername(), credentials.getPassword(), baseDn);
             if(!ObjectUtils.isEmpty(ldapUserDTO)) {
                 if(!allowedApp.getModules().contains(AuthModule.roleManagement)) {
