@@ -155,7 +155,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(allowedAppsAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
-                .addFilterBefore(jwtFilter(), BasicAuthenticationFilter.class)
+//                .addFilterBefore(jwtFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(samlFilter(), ChannelProcessingFilter.class)
                 .exceptionHandling()
                 .and()
@@ -203,7 +203,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             HttpServletResponse response,
             AuthenticationException e) throws IOException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        log.info("Error authenticating: {}", e.getLocalizedMessage());
+        log.info("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx Error authenticating: {}", e.getLocalizedMessage());
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         ApiResponse<Void> apiResponse = new ApiResponse<>("-1", e.getLocalizedMessage(), null);
