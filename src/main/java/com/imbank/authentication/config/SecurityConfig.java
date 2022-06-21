@@ -155,7 +155,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(allowedAppsAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
-//                .addFilterBefore(jwtFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(samlFilter(), ChannelProcessingFilter.class)
                 .exceptionHandling()
                 .and()
