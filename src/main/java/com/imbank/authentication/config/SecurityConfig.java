@@ -609,7 +609,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             metadataProvider.setParserPool(parserPool());
             extendedMetadataDelegate = new ExtendedMetadataDelegate(metadataProvider, extendedMetadata());
         }
-        extendedMetadataDelegate.setMetadataTrustCheck(true);
+        extendedMetadataDelegate.setMetadataTrustCheck(false);
         extendedMetadataDelegate.setMetadataRequireSignature(false);
         return extendedMetadataDelegate;
     }
