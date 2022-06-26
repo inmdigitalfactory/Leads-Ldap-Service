@@ -9,6 +9,7 @@ import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.DefaultDirObjectFactory;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.stereotype.Component;
+import org.zalando.logbook.Logbook;
 
 import java.security.KeyStore;
 
@@ -55,5 +56,8 @@ public class BeanCreator {
         return ldapTemplate;
     }
 
-
+    @Bean
+    public Logbook createRequestLogger(){
+        return Logbook.create();
+    }
 }
