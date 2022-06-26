@@ -4,7 +4,6 @@ import com.imbank.authentication.utils.Constants;
 import com.imbank.authentication.utils.JwtUtils;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,11 +39,11 @@ public class JWTFilter extends GenericFilterBean {
         Authentication authentication = getAuthentication(jwt);
         if (!ObjectUtils.isEmpty(authentication)) {
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.info("User authentication successful");
+            log.info("User authentication successful: {}", authentication);
         }
         else {
             log.info("Authentication failed");
-            throw new AuthenticationCredentialsNotFoundException("No authentication provided");
+//            throw new AuthenticationCredentialsNotFoundException("No authentication provided");
         }
         filterChain.doFilter(servletRequest, servletResponse);
     }
@@ -68,7 +67,6 @@ public class JWTFilter extends GenericFilterBean {
 
     public Authentication getAuthentication(String token) {
         Claims claims = JwtUtils.validateToken(token);
-        log.info("Claims {}", claims);
-        return new UsernamePasswordAuthenticationToken(claims, token, null);
+        return claims == null ? null : new UsernamePasswordAuthenticationToken(claims, token, null);
     }
 }
