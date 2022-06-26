@@ -6,14 +6,20 @@ import com.imbank.authentication.enums.AppPermission;
 import com.imbank.authentication.enums.AuditAction;
 import com.imbank.authentication.exceptions.AuthenticationExceptionImpl;
 import com.imbank.authentication.repositories.AllowedAppRepository;
+import com.imbank.authentication.repositories.PermissionRepository;
+import com.imbank.authentication.repositories.RoleRepository;
+import com.imbank.authentication.repositories.SystemAccessRepository;
 import com.imbank.authentication.services.AppService;
 import com.imbank.authentication.services.AuditLogService;
 import com.imbank.authentication.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AppServiceImpl implements AppService {
@@ -24,10 +30,19 @@ public class AppServiceImpl implements AppService {
     @Autowired
     private AuditLogService auditLogService;
 
+    @Autowired
+    private SystemAccessRepository systemAccessRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private PermissionRepository permissionRepository;
+
     @Override
     public AllowedApp createApp(AllowedAppDto allowedAppDto) {
         AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.createApp));
-        if(allowedAppRepository.findFirstByName(allowedAppDto.getName()).isPresent()) {
+        if(allowedAppRepository.findFirstByNameIgnoreCase(allowedAppDto.getName()).isPresent()) {
             throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST,"App already exists");
         }
         AllowedApp allowedApp = new AllowedApp();
@@ -61,10 +76,21 @@ public class AppServiceImpl implements AppService {
         AllowedApp allowedApp = allowedAppRepository.findById(id)
                 .orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "No such application"));
         AuthUtils.ensurePermitted(allowedApp, List.of(AppPermission.updateApp));
+
+        if(!allowedAppDto.getName().equals(allowedApp.getName()) && allowedAppRepository.findFirstByNameIgnoreCase(allowedAppDto.getName()).isPresent()) {
+            throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST,"App already exists");
+        }
+
+        if(!ObjectUtils.isEmpty(allowedApp.getModules())) {
+            allowedApp.setModules(new HashSet<>(allowedApp.getModules()));
+        }
         allowedApp.setEnabled(allowedAppDto.getEnabled());
+        allowedApp.setName(allowedAppDto.getName());
         allowedApp.setTokenValiditySeconds(allowedAppDto.getTokenValiditySeconds());
         allowedApp.setRefreshTokenValiditySeconds(allowedAppDto.getRefreshTokenValiditySeconds());
-        return allowedAppRepository.save(allowedApp);
+        allowedApp = allowedAppRepository.save(allowedApp);
+        auditLogService.createAuditLog(AuditAction.updateApp, allowedApp, null, Map.of("enabled", allowedAppDto.getEnabled(), "tokenValiditySeconds", allowedAppDto.getTokenValiditySeconds(), "refreshTokenValiditySeconds", allowedAppDto.getRefreshTokenValiditySeconds(), "name", allowedAppDto.getName()));
+        return allowedApp;
     }
 
     @Override
@@ -83,6 +109,12 @@ public class AppServiceImpl implements AppService {
     @Override
     public void deleteApp(long id) {
         AuthUtils.ensurePermitted((AllowedApp) null, List.of(AppPermission.createApp));
+        AllowedApp app = allowedAppRepository.findById(id).orElseThrow();
+
+        auditLogService.createAuditLog(AuditAction.deleteApp, app, null);
+        systemAccessRepository.deleteAllByAppId(id);
+        permissionRepository.deleteAllByAppId(id);
+        roleRepository.deleteAllByAppId(id);
         allowedAppRepository.deleteById(id);
     }
 }

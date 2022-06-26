@@ -75,6 +75,10 @@ public class Utils {
                 return String.format("Deleted user %s", auditLog.getUserName());
             case createApp:
                 return String.format("Created an application %s", auditLog.getAppName());
+            case deleteApp:
+                return String.format("Deleted an application %s", auditLog.getAppName());
+            case updateApp:
+                return String.format("Updated information of an application %s", auditLog.getAppName());
             case addUser:
                 return String.format("Added user %s to LDAP Service", auditLog.getUserName());
         }

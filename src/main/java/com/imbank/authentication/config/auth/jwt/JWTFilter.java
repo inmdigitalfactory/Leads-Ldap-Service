@@ -26,10 +26,10 @@ import java.util.Locale;
  * found.
  */
 @Slf4j
+//@Component
 public class JWTFilter extends GenericFilterBean {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
-
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
@@ -68,6 +68,7 @@ public class JWTFilter extends GenericFilterBean {
 
     public Authentication getAuthentication(String token) {
         Claims claims = JwtUtils.validateToken(token);
+        log.info("Claims {}", claims);
         return new UsernamePasswordAuthenticationToken(claims, token, null);
     }
 }

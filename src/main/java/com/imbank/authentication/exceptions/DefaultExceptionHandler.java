@@ -5,14 +5,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
 @Slf4j
-public class DefaultExceptionHandler {
+public class DefaultExceptionHandler extends ResponseEntityExceptionHandler {
 
 
     @ExceptionHandler(AuthenticationExceptionImpl.class)
     public ResponseEntity<String> handleAuthenticationException(WebRequest request, AuthenticationExceptionImpl authenticationException) {
+        log.error("Some error occurred", authenticationException);
         return ResponseEntity.status(authenticationException.getHttpStatus()).body(authenticationException.getMessage());
     }
 

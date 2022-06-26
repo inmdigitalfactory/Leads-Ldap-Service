@@ -3,7 +3,7 @@ package com.imbank.authentication.config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.imbank.authentication.config.auth.AllowedAppsAuthenticationFilter;
-import com.imbank.authentication.config.auth.jwt.JWTConfigurer;
+import com.imbank.authentication.config.auth.jwt.JWTFilter;
 import com.imbank.authentication.dtos.ApiResponse;
 import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.dtos.LoginSuccessDTO;
@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
+import org.opensaml.saml2.metadata.provider.HTTPMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.xml.parse.StaticBasicParserPool;
@@ -67,7 +68,9 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.util.ObjectUtils;
 
+import javax.servlet.Filter;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -152,16 +155,29 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(allowedAppsAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
-                .addFilterAfter(samlFilter(), BasicAuthenticationFilter.class)
-//                .addFilterBefore(new JWTFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(samlFilter(), ChannelProcessingFilter.class)
                 .exceptionHandling()
                 .and()
                 .authorizeRequests()
                 .antMatchers(safeEndpoints).permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .apply(securityConfigurerAdapter())
+                .logout()
+                .logoutUrl("/auth/logout")
+                .addLogoutHandler((request, response, authentication) -> {
+                    try {
+                        response.sendRedirect("/saml/logout");
+                    } catch (IOException e) {
+                        log.error("Could not logout", e);
+                    }
+                });
         ;
+    }
+
+    @Bean
+    public Filter jwtFilter() {
+        return new JWTFilter();
     }
 
 
@@ -187,7 +203,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             HttpServletResponse response,
             AuthenticationException e) throws IOException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        log.info("Error authenticating: {}", e.getLocalizedMessage());
+        log.info("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx Error authenticating: {}", e.getLocalizedMessage());
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         ApiResponse<Void> apiResponse = new ApiResponse<>("-1", e.getLocalizedMessage(), null);
@@ -214,12 +230,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         response.getWriter().println(r);
     }
-
-
-    private JWTConfigurer securityConfigurerAdapter() {
-        return new JWTConfigurer();
-    }
-
 
 
     /**
@@ -398,8 +408,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public SimpleUrlLogoutSuccessHandler successLogoutHandler() {
         SimpleUrlLogoutSuccessHandler simpleUrlLogoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
-        simpleUrlLogoutSuccessHandler.setDefaultTargetUrl("/login");
+        simpleUrlLogoutSuccessHandler.setDefaultTargetUrl("/");
         simpleUrlLogoutSuccessHandler.setAlwaysUseDefaultTargetUrl(true);
+        simpleUrlLogoutSuccessHandler.setRedirectStrategy((request, response, url) -> {
+            log.info("Redirecting after loggedout");
+            response.sendRedirect("/login");
+        });
         return simpleUrlLogoutSuccessHandler;
     }
 
@@ -415,6 +429,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         logoutHandler.setClearAuthentication(true);
         return logoutHandler;
     }
+
 
     /**
      * The filter is waiting for connections on URL suffixed with filterSuffix and presents SP metadata there
@@ -583,12 +598,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Bean
     public ExtendedMetadataDelegate idpExtendedMetadataProvider() throws MetadataProviderException {
-//        HTTPMetadataProvider httpMetadataProvider = new HTTPMetadataProvider(backgroundTimer(), httpClient(), idpMetadataUrl);
-//        httpMetadataProvider.setParserPool(parserPool());
-//        ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(httpMetadataProvider, extendedMetadata());
-        FilesystemMetadataProvider metadataProvider = new FilesystemMetadataProvider(new File("idp-metadata.xml"));
-        metadataProvider.setParserPool(parserPool());
-        ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(metadataProvider, extendedMetadata());
+        ExtendedMetadataDelegate extendedMetadataDelegate;
+        if(!ObjectUtils.isEmpty(idpMetadataUrl)) {
+            HTTPMetadataProvider httpMetadataProvider = new HTTPMetadataProvider(backgroundTimer(), httpClient(), idpMetadataUrl);
+            httpMetadataProvider.setParserPool(parserPool());
+            extendedMetadataDelegate = new ExtendedMetadataDelegate(httpMetadataProvider, extendedMetadata());
+        }
+        else {
+            FilesystemMetadataProvider metadataProvider = new FilesystemMetadataProvider(new File("idp-metadata.xml"));
+            metadataProvider.setParserPool(parserPool());
+            extendedMetadataDelegate = new ExtendedMetadataDelegate(metadataProvider, extendedMetadata());
+        }
         extendedMetadataDelegate.setMetadataTrustCheck(true);
         extendedMetadataDelegate.setMetadataRequireSignature(false);
         return extendedMetadataDelegate;
