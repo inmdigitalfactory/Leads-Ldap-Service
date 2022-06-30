@@ -19,6 +19,7 @@ import com.imbank.authentication.utils.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
 import org.opensaml.saml2.metadata.provider.HTTPMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
@@ -302,6 +303,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public WebSSOProfileOptions defaultWebSSOProfileOptions() {
         WebSSOProfileOptions webSSOProfileOptions = new WebSSOProfileOptions();
         webSSOProfileOptions.setIncludeScoping(false);
+        webSSOProfileOptions.setNameID(NameIDType.UNSPECIFIED);
+        webSSOProfileOptions.setProviderName("Advanced Analytics LDAP Service");
         return webSSOProfileOptions;
     }
 
@@ -387,7 +390,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public SimpleUrlAuthenticationFailureHandler failureRedirectHandler() {
         log.error("Could not authenticate user: ");
         SimpleUrlAuthenticationFailureHandler simpleUrlAuthenticationFailureHandler = new SimpleUrlAuthenticationFailureHandler();
-        simpleUrlAuthenticationFailureHandler.setUseForward(true);
+        simpleUrlAuthenticationFailureHandler.setUseForward(false);
         simpleUrlAuthenticationFailureHandler.setDefaultFailureUrl(samlFailureRedirectUrl);
         return simpleUrlAuthenticationFailureHandler;
     }
@@ -431,7 +434,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         logoutHandler.setClearAuthentication(true);
         return logoutHandler;
     }
-
 
     /**
      * The filter is waiting for connections on URL suffixed with filterSuffix and presents SP metadata there
@@ -658,5 +660,31 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public HTTPRedirectDeflateBinding httpRedirectDeflateBinding() {
         return new HTTPRedirectDeflateBinding(parserPool());
     }
+
+//    @Bean
+//    public HTTPArtifactBinding httpArtifactBinding() {
+//        return new HTTPArtifactBinding(parserPool(), new VelocityEngine(), new BaseSAML2MessageDecoder());
+//    }
+
+//    @Bean
+//    public HTTPSOAP11Binding httpSoapBinding() {
+//        return new HTTPSOAP11Binding(parserPool());
+//    }
+
+//    @Bean
+//    protected RelyingPartyRegistrationRepository relyingPartyRegistrations() throws Exception {
+//        byte[] bytes = FileUtils.readFileBytes("saml/saml.crt");
+//        X509Certificate certificate = X509Support.decodeCertificate(bytes);
+//        Saml2X509Credential credential = Saml2X509Credential.verification(certificate);
+//        RelyingPartyRegistration registration = RelyingPartyRegistration
+//                .withRegistrationId("saml-idp")
+//                .assertingPartyDetails(party -> party
+//                        .entityId(entityId)
+//                        .singleSignOnServiceLocation(idpMetadataUrl)
+//                        .wantAuthnRequestsSigned(false)
+//                        .verificationX509Credentials(c -> c.add(credential))
+//                ).build();
+//        return new InMemoryRelyingPartyRegistrationRepository(registration);
+//    }
 
 }

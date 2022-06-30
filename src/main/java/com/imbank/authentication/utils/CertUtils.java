@@ -45,7 +45,7 @@ public class CertUtils {
 
         saveFile("saml/saml.private.key", keyPair.getPrivate().getEncoded());
         saveFile("saml/saml.public.key", keyPair.getPublic().getEncoded());
-        Certificate c = CertUtils.selfSign(keyPair, "dc=example.com");
+        Certificate c = CertUtils.selfSign(keyPair, "dc=ldap-service-rsa.192.168.238.27.nip.io");
         saveFile("saml/saml.crt", c.getEncoded());
     }
 
