@@ -155,24 +155,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors()
                 .and()
                 .addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
-                .addFilterAfter(samlFilter(), BasicAuthenticationFilter.class)
-                .addFilterAfter(allowedAppsAuthenticationFilter(), BasicAuthenticationFilter.class)
-                .addFilterAfter(jwtFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(samlFilter(), ChannelProcessingFilter.class)
+                .addFilterBefore(allowedAppsAuthenticationFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter(), BasicAuthenticationFilter.class)
                 .exceptionHandling()
                 .and()
                 .authorizeRequests()
                 .antMatchers(safeEndpoints).permitAll()
                 .anyRequest().authenticated()
-                .and()
-                .logout()
-                .logoutUrl("/auth/logout")
-                .addLogoutHandler((request, response, authentication) -> {
-                    try {
-                        response.sendRedirect("/saml/logout");
-                    } catch (IOException e) {
-                        log.error("Could not logout", e);
-                    }
-                });
+//                .and()
+//                .logout()
+//                .logoutUrl("/auth/logout")
+//                .addLogoutHandler((request, response, authentication) -> {
+//                    try {
+//                        response.sendRedirect("/saml/logout");
+//                    } catch (IOException e) {
+//                        log.error("Could not logout", e);
+//                    }
+//                });
         ;
     }
 
@@ -341,6 +341,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private void handleSuccessfulLogin(HttpServletResponse response, Authentication authentication) {
+        log.info("Login successful: Checking details: {}", authentication);
         SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
         String username  = credential.getNameID().getValue();
         Optional<User> user = userRepository.findFirstByUsernameIgnoreCaseAndEnabled(username, true);
@@ -387,6 +388,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Bean
     public SimpleUrlAuthenticationFailureHandler failureRedirectHandler() {
+        log.error("Could not authenticate user: ");
         SimpleUrlAuthenticationFailureHandler simpleUrlAuthenticationFailureHandler = new SimpleUrlAuthenticationFailureHandler();
         simpleUrlAuthenticationFailureHandler.setUseForward(false);
         simpleUrlAuthenticationFailureHandler.setDefaultFailureUrl(samlFailureRedirectUrl);
