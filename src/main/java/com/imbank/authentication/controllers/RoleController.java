@@ -42,6 +42,11 @@ public class RoleController {
         return ResponseEntity.ok(roleService.addPermission(roleId, permissionId));
     }
 
+    @DeleteMapping("{roleId}/{permissionId}")
+    public ResponseEntity<Role> removePermission(@PathVariable Long roleId, @PathVariable Long permissionId) {
+        return ResponseEntity.ok(roleService.removePermission(roleId, permissionId));
+    }
+
 
     @DeleteMapping("{roleId}")
     public ResponseEntity<Void> deleteRole(@PathVariable Long roleId) {

@@ -68,7 +68,7 @@ public class Seeder {
                 app = optionalAllowedApp.get();
             }
             String adminRoleName = "Admin";
-            Role adminRole = roleRepository.findFirstByNameAndApp(adminRoleName, app);
+            Role adminRole = roleRepository.findFirstByAppAndNameIgnoreCase(app, adminRoleName);
             Set<Permission> allPermissions = new HashSet<>(permissionRepository.findAll());
             if(adminRole == null) {
                 adminRole = new Role();

@@ -155,7 +155,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors()
                 .and()
                 .addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class)
-                .addFilterAfter(samlFilter(), ChannelProcessingFilter.class)
+                .addFilterAfter(samlFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(allowedAppsAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter(), BasicAuthenticationFilter.class)
                 .exceptionHandling()
@@ -231,7 +231,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         response.getWriter().println(r);
     }
-
 
     /**
      * Filters for processing of SAML messages
@@ -344,6 +343,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         log.info("Login successful: Checking details: {}", authentication);
         SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
         String username  = credential.getNameID().getValue();
+
         Optional<User> user = userRepository.findFirstByUsernameIgnoreCaseAndEnabled(username, true);
         Optional<AllowedApp> thisApp = allowedAppRepository.findFirstByName(Constants.APP_NAME);
         log.info("===================================== User's name: {}\nRemote Entity ID: {}\nAdditionalData: {}\nAttributes: {}", username, credential.getRemoteEntityID(), credential.getAdditionalData(), credential.getAttributes());
@@ -392,6 +392,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         SimpleUrlAuthenticationFailureHandler simpleUrlAuthenticationFailureHandler = new SimpleUrlAuthenticationFailureHandler();
         simpleUrlAuthenticationFailureHandler.setUseForward(false);
         simpleUrlAuthenticationFailureHandler.setDefaultFailureUrl(samlFailureRedirectUrl);
+//        simpleUrlAuthenticationFailureHandler.setRedirectStrategy((request, response, url) -> {
+//            response.sendRedirect(samlFailureRedirectUrl);
+//            String req = IOUtils.toString(request.getReader());
+//            log.info("Request: {}", req);
+//            req = req.substring("SamlResponse=".length());
+//            req = URLDecoder.decode(req, StandardCharsets.UTF_8);
+//            log.info("Request: saml response: {}", req);
+//            log.info("Request: apache: isBase64: {}", org.apache.commons.codec.binary.Base64.isBase64(req));
+//            log.info("Request: apache Value: {}", new String(org.apache.commons.codec.binary.Base64.decodeBase64(req)));
+//        });
         return simpleUrlAuthenticationFailureHandler;
     }
 
@@ -517,18 +527,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public WebSSOProfileConsumer webSSOprofileConsumer() {
         return new WebSSOProfileConsumerImpl();
     }
-
-//    @Bean
-//    public SAMLContextProviderLB contextProvider() {
-//        SAMLContextProviderLB samlContextProviderLB = new SAMLContextProviderLB();
-//        samlContextProviderLB.setScheme(scheme);
-//        samlContextProviderLB.setServerName(serverName);
-//        samlContextProviderLB.setContextPath(contextPath);
-//        samlContextProviderLB.setServerPort(serverPort);
-//        samlContextProviderLB.setIncludeServerPortInRequestURL(true);
-//        samlContextProviderLB.setStorageFactory(emptyStorageFactory());
-//        return samlContextProviderLB;
-//    }
 
     /**
      * SAML 2.0 Holder-of-Key WebSSO Assertion Consumer
@@ -661,30 +659,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new HTTPRedirectDeflateBinding(parserPool());
     }
 
-//    @Bean
-//    public HTTPArtifactBinding httpArtifactBinding() {
-//        return new HTTPArtifactBinding(parserPool(), new VelocityEngine(), new BaseSAML2MessageDecoder());
-//    }
-
-//    @Bean
-//    public HTTPSOAP11Binding httpSoapBinding() {
-//        return new HTTPSOAP11Binding(parserPool());
-//    }
-
-//    @Bean
-//    protected RelyingPartyRegistrationRepository relyingPartyRegistrations() throws Exception {
-//        byte[] bytes = FileUtils.readFileBytes("saml/saml.crt");
-//        X509Certificate certificate = X509Support.decodeCertificate(bytes);
-//        Saml2X509Credential credential = Saml2X509Credential.verification(certificate);
-//        RelyingPartyRegistration registration = RelyingPartyRegistration
-//                .withRegistrationId("saml-idp")
-//                .assertingPartyDetails(party -> party
-//                        .entityId(entityId)
-//                        .singleSignOnServiceLocation(idpMetadataUrl)
-//                        .wantAuthnRequestsSigned(false)
-//                        .verificationX509Credentials(c -> c.add(credential))
-//                ).build();
-//        return new InMemoryRelyingPartyRegistrationRepository(registration);
-//    }
 
 }

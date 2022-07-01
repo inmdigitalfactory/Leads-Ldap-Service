@@ -1,6 +1,7 @@
 package com.imbank.authentication.repositories;
 
 import com.imbank.authentication.entities.AllowedApp;
+import com.imbank.authentication.entities.Role;
 import com.imbank.authentication.entities.SystemAccess;
 import com.imbank.authentication.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,8 @@ public interface SystemAccessRepository extends JpaRepository<SystemAccess, Long
     @Modifying
     @Transactional
     void deleteAllByAppId(long id);
+
+    @Modifying
+    @Transactional
+    void deleteAllByRole(Role role);
 }
