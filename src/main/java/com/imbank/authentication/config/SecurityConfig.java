@@ -112,6 +112,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private String samlSuccessRedirectUrl;
     @Value("${authentication-service.saml-failure-url}")
     private String samlFailureRedirectUrl;
+    @Value("${authentication-service.saml-response.time-skew}")
+    private int samlResponseTimeSkew;
 
     @Autowired
     private AllowedAppRepository allowedAppRepository;
@@ -495,7 +497,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Bean
     public WebSSOProfile webSSOprofile() {
-        return new WebSSOProfileImpl();
+        WebSSOProfileImpl profile = new WebSSOProfileImpl();
+        profile.setResponseSkew(samlResponseTimeSkew);
+        return profile;
     }
 
     /**
@@ -505,7 +509,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Bean
     public WebSSOProfileConsumerHoKImpl hokWebSSOProfile() {
-        return new WebSSOProfileConsumerHoKImpl();
+        WebSSOProfileConsumerHoKImpl profileConsumerHoK = new WebSSOProfileConsumerHoKImpl();
+        profileConsumerHoK.setResponseSkew(samlResponseTimeSkew);
+        return profileConsumerHoK;
     }
 
     /**
