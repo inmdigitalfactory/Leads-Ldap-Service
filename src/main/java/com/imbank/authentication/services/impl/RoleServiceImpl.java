@@ -9,6 +9,7 @@ import com.imbank.authentication.exceptions.AuthenticationExceptionImpl;
 import com.imbank.authentication.repositories.AllowedAppRepository;
 import com.imbank.authentication.repositories.PermissionRepository;
 import com.imbank.authentication.repositories.RoleRepository;
+import com.imbank.authentication.repositories.SystemAccessRepository;
 import com.imbank.authentication.services.RoleService;
 import com.imbank.authentication.utils.AuthUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -32,6 +34,9 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private PermissionRepository permissionRepository;
 
+    @Autowired
+    private SystemAccessRepository systemAccessRepository;
+
     @Override
     public List<Role> getAppRoles(Long appId) {
         AuthUtils.ensurePermitted(appId, List.of(AppPermission.getRoles));
@@ -42,6 +47,10 @@ public class RoleServiceImpl implements RoleService {
     public Role addAppRole(Long appId, AppRoleDto roleDto) {
         AuthUtils.ensurePermitted(appId, List.of(AppPermission.addRole));
         AllowedApp app = allowedAppRepository.findById(appId).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "Unknown application"));
+        Role existingRoleWithName = roleRepository.findFirstByAppAndNameIgnoreCase(app, roleDto.getName());
+        if(existingRoleWithName != null) {
+            throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST, "A role with the specified name already exists");
+        }
         Role role = new Role();
         role.setApp(app);
         role.setDescription(roleDto.getDescription());
@@ -53,8 +62,13 @@ public class RoleServiceImpl implements RoleService {
     public Role updateRole(Long roleId, AppRoleDto roleDto) {
         Role role = roleRepository.findById(roleId).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "Unknown role"));
         AllowedApp app = role.getApp();
+        Role existingRoleWithName = roleRepository.findFirstByAppAndNameIgnoreCase(app , roleDto.getName());
+        if(existingRoleWithName != null && !Objects.equals(role.getId(), existingRoleWithName.getId())) {
+            throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST, "A role with the specified name already exists");
+        }
         AuthUtils.ensurePermitted(app, List.of(AppPermission.updateRole));
         role.setApp(app);
+        role.setName(roleDto.getName());
         role.setDescription(roleDto.getDescription());
         return roleRepository.save(role);
     }
@@ -64,6 +78,8 @@ public class RoleServiceImpl implements RoleService {
         Role role = roleRepository.findById(roleId).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "Unknown role"));
         AllowedApp app = role.getApp();
         AuthUtils.ensurePermitted(app, List.of(AppPermission.deleteRole));
+        //unassign this role to every user
+        systemAccessRepository.deleteAllByRole(role);
         roleRepository.delete(role);
     }
 
@@ -73,6 +89,8 @@ public class RoleServiceImpl implements RoleService {
         AllowedApp app = role.getApp();
         AuthUtils.ensurePermitted(app, List.of(AppPermission.setRolePermissions));
         List<Permission> permissionList = permissionRepository.findAllById(permissions);
+        role.setPermissions(null);
+        role = roleRepository.save(role);
         role.setPermissions(new HashSet<>(permissionList));
         return roleRepository.save(role);
     }
@@ -84,6 +102,16 @@ public class RoleServiceImpl implements RoleService {
         AllowedApp app = role.getApp();
         AuthUtils.ensurePermitted(app, List.of(AppPermission.setRolePermissions));
         role.getPermissions().add(permissionToAdd);
+        return roleRepository.save(role);
+    }
+
+    @Override
+    public Role removePermission(Long roleId, Long permission) {
+        Role role = roleRepository.findById(roleId).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "Unknown role"));
+        Permission permissionToRemove = permissionRepository.findById(permission).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "Unknown permission"));
+        AllowedApp app = role.getApp();
+        AuthUtils.ensurePermitted(app, List.of(AppPermission.setRolePermissions));
+        role.getPermissions().remove(permissionToRemove);
         return roleRepository.save(role);
     }
 }

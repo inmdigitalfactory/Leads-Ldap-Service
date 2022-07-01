@@ -17,4 +17,6 @@ public interface RoleService {
     Role setPermissions(Long roleId, List<Long> permissions);
 
     Role addPermission(Long roleId, Long permission);
+
+    Role removePermission(Long roleId, Long permission);
 }
