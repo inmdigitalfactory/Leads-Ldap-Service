@@ -392,16 +392,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         SimpleUrlAuthenticationFailureHandler simpleUrlAuthenticationFailureHandler = new SimpleUrlAuthenticationFailureHandler();
         simpleUrlAuthenticationFailureHandler.setUseForward(false);
         simpleUrlAuthenticationFailureHandler.setDefaultFailureUrl(samlFailureRedirectUrl);
-//        simpleUrlAuthenticationFailureHandler.setRedirectStrategy((request, response, url) -> {
-//            response.sendRedirect(samlFailureRedirectUrl);
-//            String req = IOUtils.toString(request.getReader());
-//            log.info("Request: {}", req);
-//            req = req.substring("SamlResponse=".length());
-//            req = URLDecoder.decode(req, StandardCharsets.UTF_8);
-//            log.info("Request: saml response: {}", req);
-//            log.info("Request: apache: isBase64: {}", org.apache.commons.codec.binary.Base64.isBase64(req));
-//            log.info("Request: apache Value: {}", new String(org.apache.commons.codec.binary.Base64.decodeBase64(req)));
-//        });
         return simpleUrlAuthenticationFailureHandler;
     }
 
