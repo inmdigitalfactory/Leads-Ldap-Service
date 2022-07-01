@@ -499,6 +499,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public WebSSOProfile webSSOprofile() {
         WebSSOProfileImpl profile = new WebSSOProfileImpl();
         profile.setResponseSkew(samlResponseTimeSkew);
+        profile.setMaxAssertionTime(samlResponseTimeSkew);
         return profile;
     }
 
@@ -511,6 +512,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public WebSSOProfileConsumerHoKImpl hokWebSSOProfile() {
         WebSSOProfileConsumerHoKImpl profileConsumerHoK = new WebSSOProfileConsumerHoKImpl();
         profileConsumerHoK.setResponseSkew(samlResponseTimeSkew);
+        profileConsumerHoK.setMaxAuthenticationAge(samlResponseTimeSkew);
         return profileConsumerHoK;
     }
 
