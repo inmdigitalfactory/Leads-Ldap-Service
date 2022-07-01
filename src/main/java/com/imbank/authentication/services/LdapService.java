@@ -7,4 +7,5 @@ import com.imbank.authentication.entities.AllowedApp;
 public interface LdapService {
     LdapUserDTO getADDetails(AllowedApp app, AuthDTO credentials);
     LdapUserDTO getADDetails(String adUsername, String ou);
+    LdapUserDTO getADDetailsByEmail(String email);
 }
