@@ -345,6 +345,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         log.info("Login successful: Checking details: {}", authentication);
         SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
         String username  = credential.getNameID().getValue();
+        if(username.contains("@")) {
+            //search using email
+            log.info("Authentication service returned an email. Checking AD for username, then db for access");
+            LdapUserDTO userDTO = ldapService.getADDetailsByEmail(username);
+            username = userDTO.getUsername();
+
+        }
 
         Optional<User> user = userRepository.findFirstByUsernameIgnoreCaseAndEnabled(username, true);
         Optional<AllowedApp> thisApp = allowedAppRepository.findFirstByName(Constants.APP_NAME);

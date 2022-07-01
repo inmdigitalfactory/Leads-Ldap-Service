@@ -89,7 +89,16 @@ public class LdapServiceImpl implements LdapService {
         return getADDetails(adUsername, null, baseDn);
     }
 
+    @Override
+    public LdapUserDTO getADDetailsByEmail(String email) {
+        return getADDetails(email, null, baseDn, "mail");
+    }
+
     private LdapUserDTO getADDetails(String adUsername, String password, String baseDn) {
+        return getADDetails(adUsername, password, baseDn, dnPattern);
+    }
+
+    private LdapUserDTO getADDetails(String adUsername, String password, String baseDn, String dnPattern) {
         try {
             AndFilter filter = new AndFilter();
             filter.and(new EqualsFilter(dnPattern, adUsername));
