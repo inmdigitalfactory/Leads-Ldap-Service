@@ -14,6 +14,7 @@ import com.imbank.authentication.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -63,8 +64,10 @@ public class PermissionServiceImpl implements PermissionService {
         if(optionalPermission.isPresent() && !Objects.equals(permission.getId(), optionalPermission.get().getId())) {
             throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST, "A permission already exists with this name for this app");
         }
+        if(!ObjectUtils.isEmpty(permissionDto.getCode())){
+            permission.setCode(permissionDto.getCode());
+        }
         permission.setDescription(permissionDto.getDescription());
-        permission.setCode(permissionDto.getCode());
         return permissionRepository.save(permission);
     }
 
