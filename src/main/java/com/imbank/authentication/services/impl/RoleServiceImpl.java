@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -66,9 +67,11 @@ public class RoleServiceImpl implements RoleService {
         if(existingRoleWithName != null && !Objects.equals(role.getId(), existingRoleWithName.getId())) {
             throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST, "A role with the specified name already exists");
         }
+        if(!ObjectUtils.isEmpty(roleDto.getName())){
+            role.setName(roleDto.getName());
+        }
         AuthUtils.ensurePermitted(app, List.of(AppPermission.updateRole));
         role.setApp(app);
-        role.setName(roleDto.getName());
         role.setDescription(roleDto.getDescription());
         return roleRepository.save(role);
     }
