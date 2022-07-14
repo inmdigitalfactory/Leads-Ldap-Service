@@ -18,5 +18,10 @@ public enum AppPermission {
     getRoles,//specific
     addRole,
     updateRole,
-    setRolePermissions, getPermissions, addPermission, viewAuditLogs, deleteRole
+    setRolePermissions,
+    getPermissions,
+    addPermission,
+    viewAuditLogs,
+    downloadAuditLogs,
+    deleteRole
 }

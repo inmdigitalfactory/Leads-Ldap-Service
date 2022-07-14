@@ -119,7 +119,7 @@ public class LdapServiceImpl implements LdapService {
                 finalLdapUser.setEmail(getValue(a, "mail"));
                 finalLdapUser.setDepartment(getValue(a, "department"));
                 finalLdapUser.setPhone(getValue(a, "phone"));
-                finalLdapUser.setUsername(getValue(a, "sAMAccountName"));
+                finalLdapUser.setUsername(getValue(a, this.dnPattern));
                 finalLdapUser.setDescription(getValue(a, "description"));
                 finalLdapUser.setBaseDn(((DirContextAdapter) o).getDn() + "");
 

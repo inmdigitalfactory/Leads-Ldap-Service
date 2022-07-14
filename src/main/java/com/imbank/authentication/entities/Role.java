@@ -29,7 +29,7 @@ public class Role extends EntityAuditor {
 
     private String name;
     private String description;
-    @OneToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
     private Set<Permission> permissions;
     @ManyToOne

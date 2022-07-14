@@ -48,24 +48,18 @@ public class JwtUtils {
                         .map(systemAccess -> systemAccess.getRole().getName())
                         .collect(Collectors.toSet()));
                 List<String> permissions = new ArrayList<>();
+                List<Long> apps = new ArrayList<>();
                 if(isLdapService) {
-                    //permissions are stored as <permission_code><target_app_id> for
                     user.getUser()
                             .getSystemAccesses()
-                            .stream().filter(systemAccess -> systemAccess.getApp().getId().equals(app.getId()))
-                            .forEach(userRole ->
-                                    userRole.getRole()
-                                            .getPermissions().forEach(permission -> {
-                                                if(!ObjectUtils.isEmpty(userRole.getApps())) {
-                                                    userRole.getApps()
-                                                            .forEach(a ->
-                                                                    permissions
-                                                                            .add(String.format("%s_%d", permission.getCode(), a.getId())));
-                                                }
-                                                else {
-                                                    permissions.add(permission.getCode());
-                                                }
-                                            }));
+                            .stream()
+                            .filter(systemAccess -> systemAccess.getApp().getId().equals(app.getId()))
+                            .forEach(userRole -> {
+                                apps.addAll(userRole.getApps().stream().map(AllowedApp::getId).collect(Collectors.toList()));
+                                userRole.getRole()
+                                        .getPermissions().forEach(permission -> permissions.add(permission.getCode()));
+                    });
+                    jwt.claim(CLAIM_APPS, apps);
                 }
                 else {
                     user.getUser()
