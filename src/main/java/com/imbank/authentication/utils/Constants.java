@@ -10,6 +10,7 @@ public class Constants {
     public static final String CLAIM_IP = "ip";
     public static final String CLAIM_ROLES = "roles";
     public static final String CLAIM_PERMISSIONS = "permissions";
+    public static final String CLAIM_APPS = "apps";
     public static final String CLAIM_FUNCTION = "function";
 
 

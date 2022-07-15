@@ -185,11 +185,15 @@ public class UserServiceImpl implements UserService {
         AuthUtils.ensurePermitted(systemAccessDto.getApp(), List.of(AppPermission.updateUser));
 
         AllowedApp app = allowedAppRepository.findById(systemAccessDto.getApp()).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "Unknown application"));
+        if(app.isLdapService() && ObjectUtils.isEmpty(systemAccessDto.getAppIds())) {
+            throw new AuthenticationExceptionImpl(HttpStatus.BAD_REQUEST, "You must specify apps that this access is being granted for");
+        }
+
         Role role = roleRepository.findById(systemAccessDto.getRole()).orElseThrow(()->new AuthenticationExceptionImpl(HttpStatus.NOT_FOUND, "No such role"));
         Optional<SystemAccess> existingAccess = systemAccessRepository.findFirstByUserAndApp(user, app);
         SystemAccess access = existingAccess.orElseGet(() -> SystemAccess.builder()
                 .app(app)
-//                    .apps(apps)
+                .apps(new HashSet<>(allowedAppRepository.findAllById(systemAccessDto.getAppIds())))
                 .user(user)
                 .role(role)
                 .build());

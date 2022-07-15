@@ -349,8 +349,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             //search using email
             log.info("Authentication service returned an email. Checking AD for username, then db for access");
             LdapUserDTO userDTO = ldapService.getADDetailsByEmail(username);
+            log.info("USER DTO IS {}", userDTO);
             username = userDTO.getUsername();
-
         }
 
         Optional<User> user = userRepository.findFirstByUsernameIgnoreCaseAndEnabled(username, true);
@@ -358,7 +358,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         log.info("===================================== User's name: {}\nRemote Entity ID: {}\nAdditionalData: {}\nAttributes: {}", username, credential.getRemoteEntityID(), credential.getAdditionalData(), credential.getAttributes());
         if(user.isPresent() && thisApp.isPresent()) {
             LdapUserDTO ldapUserDTO = LdapUserDTO.builder().user(user.get()).username(username).build();
+            log.info("About to generate token: {}", thisApp.get());
             String token = JwtUtils.createToken(ldapUserDTO, thisApp.get(), null, false );
+            log.info("Generated token: {}", token);
             Cookie tokenCookie = new Cookie(Constants.TOKEN_COOKIE_NAME, token);
 //                            tokenCookie.setHttpOnly(false);
                     tokenCookie.setPath("/");
@@ -372,7 +374,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             refreshTokenCookie.setMaxAge((int) thisApp.get().getRefreshTokenValiditySeconds());
             response.addCookie(tokenCookie);
             response.addCookie(refreshTokenCookie);
-            log.info("Login successful");
+            log.info("Login successful..");
         }
         else {
             Map<String, Object> data = Map.of(
@@ -387,6 +389,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 loginError.setMaxAge(5);
                 response.addCookie(loginError);
             } catch (JsonProcessingException ignored) {}
+            log.error("Login failed--------------{}{}", user, thisApp);
         }
     }
 

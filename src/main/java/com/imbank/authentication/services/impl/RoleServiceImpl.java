@@ -95,6 +95,7 @@ public class RoleServiceImpl implements RoleService {
         role.setPermissions(null);
         role = roleRepository.save(role);
         role.setPermissions(new HashSet<>(permissionList));
+        log.info("Permissions are {}", permissionList);
         return roleRepository.save(role);
     }
 
