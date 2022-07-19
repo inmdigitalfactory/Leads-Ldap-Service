@@ -114,6 +114,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private String samlFailureRedirectUrl;
     @Value("${authentication-service.saml-response.time-skew}")
     private int samlResponseTimeSkew;
+    @Value("${authentication-service.saml-response.max-auth-age}")
+    private int maxAuthAgeMinutes;
 
     @Autowired
     private AllowedAppRepository allowedAppRepository;
@@ -522,7 +524,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public WebSSOProfileConsumerHoKImpl hokWebSSOProfile() {
         WebSSOProfileConsumerHoKImpl profileConsumerHoK = new WebSSOProfileConsumerHoKImpl();
         profileConsumerHoK.setResponseSkew(samlResponseTimeSkew);
-        profileConsumerHoK.setMaxAuthenticationAge(samlResponseTimeSkew);
+        profileConsumerHoK.setMaxAuthenticationAge(maxAuthAgeMinutes *60*1000L);
         return profileConsumerHoK;
     }
 
