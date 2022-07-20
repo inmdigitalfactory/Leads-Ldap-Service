@@ -34,17 +34,21 @@ public class JWTFilter extends GenericFilterBean {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
         throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
-        String jwt = resolveToken(httpServletRequest);
+//        log.info("URI is Path->{} : uri->{} : url->{}", httpServletRequest.getPathInfo(), httpServletRequest.getRequestURI(), httpServletRequest.getRequestURL());
+        if(!"/saml/logout".endsWith(httpServletRequest.getRequestURI())) {
+            String jwt = resolveToken(httpServletRequest);
 
-        Authentication authentication = getAuthentication(jwt);
-        if (!ObjectUtils.isEmpty(authentication)) {
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.info("User authentication successful: {}", authentication);
+            Authentication authentication = getAuthentication(jwt);
+            if (!ObjectUtils.isEmpty(authentication)) {
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.info("User authentication successful: {}", authentication);
+            }
+            else {
+                log.info("Authentication failed");
+//                throw new AuthenticationCredentialsNotFoundException("No authentication provided");
+            }
         }
-        else {
-            log.info("Authentication failed");
-//            throw new AuthenticationCredentialsNotFoundException("No authentication provided");
-        }
+
         filterChain.doFilter(servletRequest, servletResponse);
     }
 

@@ -110,6 +110,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private String entityBaseUrl;
     @Value("${authentication-service.saml-success-url}")
     private String samlSuccessRedirectUrl;
+    @Value("${authentication-service.saml-logout-url}")
+    private String samlLogoutRedirectUrl;
     @Value("${authentication-service.saml-failure-url}")
     private String samlFailureRedirectUrl;
     @Value("${authentication-service.saml-response.time-skew}")
@@ -363,17 +365,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             log.info("About to generate token: {}", thisApp.get());
             String token = JwtUtils.createToken(ldapUserDTO, thisApp.get(), null, false );
             log.info("Generated token: {}", token);
-            Cookie tokenCookie = new Cookie(Constants.TOKEN_COOKIE_NAME, token);
-//                            tokenCookie.setHttpOnly(false);
-                    tokenCookie.setPath("/");
-                            tokenCookie.setDomain(apiDomain);
-                    tokenCookie.setMaxAge((int) thisApp.get().getTokenValiditySeconds());
+            Cookie tokenCookie = getCookie(Constants.TOKEN_COOKIE_NAME, token, (int) thisApp.get().getTokenValiditySeconds());
             String refreshToken = JwtUtils.createToken(ldapUserDTO, thisApp.get(), null, true );
-            Cookie refreshTokenCookie = new Cookie(Constants.REFRESH_TOKEN_COOKIE_NAME, refreshToken);
-//                    refreshTokenCookie.setHttpOnly(false);
-            refreshTokenCookie.setPath("/");
-                    refreshTokenCookie.setDomain(apiDomain);
-            refreshTokenCookie.setMaxAge((int) thisApp.get().getRefreshTokenValiditySeconds());
+            Cookie refreshTokenCookie = getCookie(Constants.REFRESH_TOKEN_COOKIE_NAME, refreshToken, (int) thisApp.get().getRefreshTokenValiditySeconds());
             response.addCookie(tokenCookie);
             response.addCookie(refreshTokenCookie);
             log.info("Login successful..");
@@ -385,14 +379,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             try {
                 String value = objectMapper.writeValueAsString(data);
                 value = URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
-                Cookie loginError = new Cookie("error", value);
-                loginError.setPath("/");
-                loginError.setDomain(apiDomain);
-                loginError.setMaxAge(5);
+                Cookie loginError = getCookie("error", value, 5);
                 response.addCookie(loginError);
             } catch (JsonProcessingException ignored) {}
             log.error("Login failed--------------{}{}", user, thisApp);
         }
+    }
+
+    private Cookie getCookie(String tokenCookieName, String value, int expiration) {
+        Cookie cookie = new Cookie(tokenCookieName, value);
+        cookie.setHttpOnly(false);
+        cookie.setPath("/");
+        cookie.setDomain(apiDomain);
+        cookie.setMaxAge(expiration);
+        return cookie;
     }
 
     /**
@@ -430,8 +430,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         simpleUrlLogoutSuccessHandler.setDefaultTargetUrl("/");
         simpleUrlLogoutSuccessHandler.setAlwaysUseDefaultTargetUrl(true);
         simpleUrlLogoutSuccessHandler.setRedirectStrategy((request, response, url) -> {
-            log.info("Redirecting after loggedout");
-            response.sendRedirect("/login");
+            log.info("Redirecting after logged out");
+            Cookie tokenCookie = getCookie(Constants.TOKEN_COOKIE_NAME, "", 0);
+            Cookie errorCookie = getCookie("error", "", 0);
+            response.addCookie(tokenCookie);
+            response.addCookie(errorCookie);
+            response.sendRedirect(samlLogoutRedirectUrl);
+//            request
         });
         return simpleUrlLogoutSuccessHandler;
     }
