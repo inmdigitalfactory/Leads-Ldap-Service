@@ -391,7 +391,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         cookie.setHttpOnly(false);
         cookie.setPath("/");
         cookie.setDomain(apiDomain);
-        cookie.setSecure(true);
         cookie.setMaxAge(expiration);
         return cookie;
     }
