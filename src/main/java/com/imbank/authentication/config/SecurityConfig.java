@@ -390,7 +390,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private boolean hasAuthServiceAccess(User user) {
         Optional<SystemAccess> authServiceAccess = user.getSystemAccesses().stream().filter(s -> s.getApp().isLdapService()).findFirst();
-        return authServiceAccess.isEmpty() || !Boolean.TRUE.equals(authServiceAccess.get().getEnabled());
+        return authServiceAccess.isPresent() && Boolean.TRUE.equals(authServiceAccess.get().getEnabled());
     }
 
     private Cookie getCookie(String tokenCookieName, String value, int expiration) {
