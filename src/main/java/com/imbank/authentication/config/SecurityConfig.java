@@ -383,6 +383,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 value = URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
                 Cookie loginError = getCookie("error", value, 5);
                 response.addCookie(loginError);
+                response.addCookie(getCookie(Constants.TOKEN_COOKIE_NAME, "", 0));
             } catch (JsonProcessingException ignored) {}
             log.error("Login failed--------------{}{}", user, thisApp);
         }
@@ -390,7 +391,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private boolean hasAuthServiceAccess(User user) {
         Optional<SystemAccess> authServiceAccess = user.getSystemAccesses().stream().filter(s -> s.getApp().isLdapService()).findFirst();
-        return authServiceAccess.isEmpty() || !Boolean.TRUE.equals(authServiceAccess.get().getEnabled());
+        return authServiceAccess.isPresent() && Boolean.TRUE.equals(authServiceAccess.get().getEnabled());
     }
 
     private Cookie getCookie(String tokenCookieName, String value, int expiration) {
@@ -439,14 +440,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         simpleUrlLogoutSuccessHandler.setAlwaysUseDefaultTargetUrl(true);
         simpleUrlLogoutSuccessHandler.setRedirectStrategy((request, response, url) -> {
             log.info("Redirecting after logged out");
-            Cookie tokenCookie = getCookie(Constants.TOKEN_COOKIE_NAME, "", 0);
-            Cookie errorCookie = getCookie("error", "", 0);
-            response.addCookie(tokenCookie);
-            response.addCookie(errorCookie);
+            removeCookies(response);
             response.sendRedirect(samlLogoutRedirectUrl);
 //            request
         });
         return simpleUrlLogoutSuccessHandler;
+    }
+
+    private void removeCookies(HttpServletResponse response) {
+        Cookie tokenCookie = getCookie(Constants.TOKEN_COOKIE_NAME, "", 0);
+        Cookie errorCookie = getCookie("error", "", 0);
+        response.addCookie(tokenCookie);
+        response.addCookie(errorCookie);
     }
 
     /**
