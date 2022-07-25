@@ -8,6 +8,7 @@ import com.imbank.authentication.dtos.ApiResponse;
 import com.imbank.authentication.dtos.LdapUserDTO;
 import com.imbank.authentication.dtos.LoginSuccessDTO;
 import com.imbank.authentication.entities.AllowedApp;
+import com.imbank.authentication.entities.SystemAccess;
 import com.imbank.authentication.entities.User;
 import com.imbank.authentication.repositories.AllowedAppRepository;
 import com.imbank.authentication.repositories.UserRepository;
@@ -360,7 +361,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         Optional<User> user = userRepository.findFirstByUsernameIgnoreCaseAndEnabled(username, true);
         Optional<AllowedApp> thisApp = allowedAppRepository.findFirstByName(Constants.APP_NAME);
         log.info("===================================== User's name: {}\nRemote Entity ID: {}\nAdditionalData: {}\nAttributes: {}", username, credential.getRemoteEntityID(), credential.getAdditionalData(), credential.getAttributes());
-        if(user.isPresent() && thisApp.isPresent()) {
+        if(user.isPresent() && hasAuthServiceAccess(user.get()) && thisApp.isPresent()) {
+
             LdapUserDTO ldapUserDTO = LdapUserDTO.builder().user(user.get()).username(username).build();
             log.info("About to generate token: {}", thisApp.get());
             String token = JwtUtils.createToken(ldapUserDTO, thisApp.get(), null, false );
@@ -384,6 +386,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             } catch (JsonProcessingException ignored) {}
             log.error("Login failed--------------{}{}", user, thisApp);
         }
+    }
+
+    private boolean hasAuthServiceAccess(User user) {
+        Optional<SystemAccess> authServiceAccess = user.getSystemAccesses().stream().filter(s -> s.getApp().isLdapService()).findFirst();
+        return authServiceAccess.isEmpty() || !Boolean.TRUE.equals(authServiceAccess.get().getEnabled());
     }
 
     private Cookie getCookie(String tokenCookieName, String value, int expiration) {
